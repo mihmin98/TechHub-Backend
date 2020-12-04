@@ -1,6 +1,5 @@
 package com.techflow.techhubbackend.model;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -61,7 +60,7 @@ public class RegularUserModel extends UserModel {
                 ", type='" + type + '\'' +
                 ", profilePicture=" + profilePicture + '\'' +
                 ", accountStatus='" + accountStatus + '\'' +
-                "totalPoints=" + totalPoints +
+                ", totalPoints=" + totalPoints +
                 ", currentPoints=" + currentPoints +
                 ", vipStatus=" + vipStatus +
                 '}';
