@@ -56,6 +56,11 @@ public class RegularUserModel extends UserModel {
     @Override
     public String toString() {
         return "RegularUserModel{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", type='" + type + '\'' +
+                ", profilePicture=" + profilePicture + '\'' +
+                ", accountStatus='" + accountStatus + '\'' +
                 "totalPoints=" + totalPoints +
                 ", currentPoints=" + currentPoints +
                 ", vipStatus=" + vipStatus +
@@ -67,14 +72,16 @@ public class RegularUserModel extends UserModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RegularUserModel that = (RegularUserModel) o;
-        return totalPoints == that.totalPoints &&
+        return super.equals(o) &&
+                totalPoints == that.totalPoints &&
                 currentPoints == that.currentPoints &&
                 vipStatus == that.vipStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(totalPoints, currentPoints, vipStatus);
+        return Objects.hash(username, password, type, profilePicture,
+                accountStatus, totalPoints, currentPoints, vipStatus);
     }
 
     public Map<String, Object> getMap() {

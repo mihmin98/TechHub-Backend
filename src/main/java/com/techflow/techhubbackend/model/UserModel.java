@@ -6,11 +6,11 @@ import java.util.Objects;
 
 public class UserModel {
 
-    private String username;
-    private String password;
-    private String type;
-    private String profilePicture;
-    private String accountStatus;
+    protected String username;
+    protected String password;
+    protected String type;
+    protected String profilePicture;
+    protected String accountStatus;
 
     public UserModel() {
     }
@@ -77,7 +77,7 @@ public class UserModel {
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", type='" + type + '\'' +
-                ", profilePicture=" + profilePicture +
+                ", profilePicture=" + profilePicture + '\'' +
                 ", accountStatus='" + accountStatus + '\'' +
                 '}';
     }
