@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 //CRUD operations
 @Service
 public class UserService {
-    public static final String COL_NAME="user";
+    public static final String COL_NAME = "user";
 
     @Autowired
     private Firestore dbFirestore;
@@ -32,10 +32,10 @@ public class UserService {
 
         UserModel user = null;
 
-        if(document.exists()) {
+        if (document.exists()) {
             user = document.toObject(UserModel.class);
             return user;
-        }else {
+        } else {
             return null;
         }
     }
@@ -47,7 +47,7 @@ public class UserService {
 
     public String deleteUser(String username) {
         ApiFuture<WriteResult> writeResult = dbFirestore.collection(COL_NAME).document(username).delete();
-        return "Document with username "+username+" has been deleted";
+        return "Document with username " + username + " has been deleted";
     }
 
     public UserModel requestUserLogIn(String username, String password) throws ExecutionException, InterruptedException {
@@ -58,15 +58,14 @@ public class UserService {
 
         UserModel user = null;
 
-        if(document.exists()) {
+        if (document.exists()) {
             user = document.toObject(UserModel.class);
-            if(password.equals(user.getPassword())) {
+            if (user != null && password.equals(user.getPassword())) {
                 return user;
-            }
-            else{
+            } else {
                 return null;
             }
-        }else {
+        } else {
             return null;
         }
     }
