@@ -24,8 +24,8 @@ public class UserService {
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 
-    public UserModel getUserDetails(String name) throws InterruptedException, ExecutionException {
-        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(name);
+    public UserModel getUserDetails(String username) throws InterruptedException, ExecutionException {
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(username);
         ApiFuture<DocumentSnapshot> future = documentReference.get();
 
         DocumentSnapshot document = future.get();
@@ -45,9 +45,30 @@ public class UserService {
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
 
-    public String deleteUser(String name) {
-        ApiFuture<WriteResult> writeResult = dbFirestore.collection(COL_NAME).document(name).delete();
-        return "Document with User ID "+name+" has been deleted";
+    public String deleteUser(String username) {
+        ApiFuture<WriteResult> writeResult = dbFirestore.collection(COL_NAME).document(username).delete();
+        return "Document with username "+username+" has been deleted";
+    }
+
+    public UserModel requestUserLogIn(String username, String password) throws ExecutionException, InterruptedException {
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(username);
+        ApiFuture<DocumentSnapshot> future = documentReference.get();
+
+        DocumentSnapshot document = future.get();
+
+        UserModel user = null;
+
+        if(document.exists()) {
+            user = document.toObject(UserModel.class);
+            if(password.equals(user.getPassword())) {
+                return user;
+            }
+            else{
+                return null;
+            }
+        }else {
+            return null;
+        }
     }
 
 }
