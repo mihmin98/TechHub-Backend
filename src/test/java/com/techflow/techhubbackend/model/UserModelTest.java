@@ -24,12 +24,13 @@ public class UserModelTest {
         assertEquals(username, user.getUsername());
         assertEquals("no password", user.getPassword());
         assertEquals(type, user.getType());
-        assertEquals("no profile picture", user.getProfilePictureId());
+        assertEquals("no profile picture", user.getProfilePicture());
         assertEquals("no account_status", user.getAccountStatus());
     }
 
     @Test
     void testEqualsMethod() {
+        String email = "email";
         String username = "user";
         String differentUsername = "username";
         String password = "pass";
@@ -37,7 +38,7 @@ public class UserModelTest {
         String profilePicture = "profile";
         String accountStatus = "account";
 
-        UserModel user = new UserModel(username, password, type, profilePicture, accountStatus);
+        UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus);
 
         // Check object of different class
         Object obj = new Object();
@@ -47,7 +48,7 @@ public class UserModelTest {
         assertEquals(true, user.equals(user));
 
         // Check object with same field values
-        UserModel user2 = new UserModel(username, password, type, profilePicture, accountStatus);
+        UserModel user2 = new UserModel(email, password, username, type, profilePicture, accountStatus);
         assertEquals(true, user.equals(user2));
 
         // Check object with different field values
@@ -57,18 +58,20 @@ public class UserModelTest {
 
     @Test
     void testGetMapMethod() {
-        String username = "user";
+        String email = "email";
         String password = "pass";
+        String username = "user";
         String type = " type";
         String profilePicture = "profile";
         String accountStatus = "account";
 
-        UserModel user = new UserModel(username, password, type, profilePicture, accountStatus);
+        UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus);
 
         Map<String, Object> map = user.getMap();
 
-        assertEquals(username, map.get("username"));
+        assertEquals(email, map.get("email"));
         assertEquals(password, map.get("password_hash"));
+        assertEquals(username, map.get("username"));
         assertEquals(type, map.get("type"));
         assertEquals(profilePicture, map.get("profile_picture"));
         assertEquals(accountStatus, map.get("account_status"));
