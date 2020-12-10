@@ -13,9 +13,9 @@ public class RegularUserModel extends UserModel {
         super();
     }
 
-    public RegularUserModel(String username, String password, String type, String profilePicture, String accountStatus,
-                            int totalPoints, int currentPoints, boolean vipStatus) {
-        super(username, password, type, profilePicture, accountStatus);
+    public RegularUserModel(String email, String password, String username, String type, String profilePicture,
+                            String accountStatus, int totalPoints, int currentPoints, boolean vipStatus) {
+        super(email, password, username, type, profilePicture, accountStatus);
         this.totalPoints = totalPoints;
         this.currentPoints = currentPoints;
         this.vipStatus = vipStatus;
@@ -55,8 +55,9 @@ public class RegularUserModel extends UserModel {
     @Override
     public String toString() {
         return "RegularUserModel{" +
-                "username='" + username + '\'' +
+                "email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", username='" + username + '\'' +
                 ", type='" + type + '\'' +
                 ", profilePicture=" + profilePicture + '\'' +
                 ", accountStatus='" + accountStatus + '\'' +
@@ -79,7 +80,7 @@ public class RegularUserModel extends UserModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, password, type, profilePicture,
+        return Objects.hash(email, password, username, type, profilePicture,
                 accountStatus, totalPoints, currentPoints, vipStatus);
     }
 
