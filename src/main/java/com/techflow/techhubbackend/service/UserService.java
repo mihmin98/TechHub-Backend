@@ -50,8 +50,8 @@ public class UserService {
         return "Document with username " + username + " has been deleted";
     }
 
-    public UserModel requestUserLogIn(String username, String password) throws ExecutionException, InterruptedException {
-        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(username);
+    public UserModel requestUserLogIn(String email, String password) throws ExecutionException, InterruptedException {
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(email);
         ApiFuture<DocumentSnapshot> future = documentReference.get();
 
         DocumentSnapshot document = future.get();

@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/requestUserLogIn")
-    public UserModel requestUserLogIn(@RequestParam String username, @RequestParam String password) throws InterruptedException, ExecutionException {
-        return userService.requestUserLogIn(username, password);
+    public UserModel requestUserLogIn(@RequestParam String email, @RequestParam String password) throws InterruptedException, ExecutionException {
+        return userService.requestUserLogIn(email, password);
     }
 }
