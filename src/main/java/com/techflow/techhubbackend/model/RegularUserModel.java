@@ -23,9 +23,9 @@ public class RegularUserModel extends UserModel {
 
     public RegularUserModel(Map<String, Object> map) {
         super(map);
-        this.totalPoints = (Integer) map.getOrDefault("total_points", 0);
-        this.currentPoints = (Integer) map.getOrDefault("current_points", 0);
-        this.vipStatus = (Boolean) map.getOrDefault("vip_status", false);
+        this.totalPoints = (Integer) map.getOrDefault("totalPoints", 0);
+        this.currentPoints = (Integer) map.getOrDefault("currentPoints", 0);
+        this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
     }
 
     public int getTotalPoints() {
@@ -87,9 +87,9 @@ public class RegularUserModel extends UserModel {
     public Map<String, Object> getMap() {
         Map<String, Object> map = super.getMap();
 
-        map.put("total_points", totalPoints);
-        map.put("current_points", currentPoints);
-        map.put("vip_status", vipStatus);
+        map.put("totalPoints", totalPoints);
+        map.put("currentPoints", currentPoints);
+        map.put("vipStatus", vipStatus);
         return map;
     }
 }

@@ -27,11 +27,11 @@ public class UserModel {
 
     public UserModel(Map<String, Object> map) {
         this.email = (String) map.getOrDefault("email", "no email");
-        this.password = (String) map.getOrDefault("password_hash", "no password");
+        this.password = (String) map.getOrDefault("password", "no password");
         this.username = (String) map.getOrDefault("username", "no username");
         this.type = (String) map.getOrDefault("type", "no type");
-        this.profilePicture = (String) map.getOrDefault("profile_picture", "no profile picture");
-        this.accountStatus = (String) map.getOrDefault("account_status", "no account_status");
+        this.profilePicture = (String) map.getOrDefault("profilePicture", "no profile picture");
+        this.accountStatus = (String) map.getOrDefault("accountStatus", "no account_status");
     }
 
     public String getEmail() {
@@ -116,11 +116,11 @@ public class UserModel {
         Map<String, Object> map = new HashMap<>();
 
         map.put("email", email);
-        map.put("password_hash", password);
+        map.put("password", password);
         map.put("username", username);
         map.put("type", type);
-        map.put("profile_picture", profilePicture);
-        map.put("account_status", accountStatus);
+        map.put("profilePicture", profilePicture);
+        map.put("accountStatus", accountStatus);
         return map;
     }
 }
