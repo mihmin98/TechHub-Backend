@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -24,7 +25,11 @@ public class UserService implements UserDetailsService {
     @Autowired
     private Firestore dbFirestore;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     public String saveUserDetails(UserModel user) throws InterruptedException, ExecutionException {
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.getMap());
         return collectionsApiFuture.get().getUpdateTime().toString();
     }
