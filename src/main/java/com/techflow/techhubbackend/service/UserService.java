@@ -60,26 +60,6 @@ public class UserService implements UserDetailsService {
         return "Document with username " + username + " has been deleted";
     }
 
-    public UserModel requestUserLogIn(String email, String password) throws ExecutionException, InterruptedException {
-        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(email);
-        ApiFuture<DocumentSnapshot> future = documentReference.get();
-
-        DocumentSnapshot document = future.get();
-
-        UserModel user = null;
-
-        if (document.exists()) {
-            user = document.toObject(UserModel.class);
-            if (user != null && password.equals(user.getPassword())) {
-                return user;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(username);
