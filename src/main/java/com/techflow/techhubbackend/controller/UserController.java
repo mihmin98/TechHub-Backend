@@ -31,9 +31,4 @@ public class UserController {
     public String deleteUser(@RequestParam String name) {
         return userService.deleteUser(name);
     }
-
-    @GetMapping("/requestUserLogIn")
-    public UserModel requestUserLogIn(@RequestParam String email, @RequestParam String password) throws InterruptedException, ExecutionException {
-        return userService.requestUserLogIn(email, password);
-    }
 }
