@@ -9,14 +9,17 @@ public class UserModel {
     protected String email;
     protected String password;
     protected String username;
-    protected String type;
+    protected UserType type;
     protected String profilePicture;
     protected String accountStatus;
+    private int totalPoints;
+    private int currentPoints;
+    private boolean vipStatus;
 
     public UserModel() {
     }
 
-    public UserModel(String email, String password, String username, String type, String profilePicture, String accountStatus) {
+    public UserModel(String email, String password, String username, UserType type, String profilePicture, String accountStatus) {
         this.email = email;
         this.password = password;
         this.username = username;
@@ -25,13 +28,33 @@ public class UserModel {
         this.accountStatus = accountStatus;
     }
 
+    public UserModel(String email, String password, String username, UserType type, String profilePicture,
+                     String accountStatus, int totalPoints, int currentPoints, boolean vipStatus) {
+        this.email = email;
+        this.password = password;
+        this.username = username;
+        this.type = type;
+        this.profilePicture = profilePicture;
+        this.accountStatus = accountStatus;
+        if (type == UserType.REGULAR_USER) {
+            this.totalPoints = totalPoints;
+            this.currentPoints = currentPoints;
+            this.vipStatus = vipStatus;
+        }
+    }
+
     public UserModel(Map<String, Object> map) {
         this.email = (String) map.getOrDefault("email", "no email");
         this.password = (String) map.getOrDefault("password", "no password");
         this.username = (String) map.getOrDefault("username", "no username");
-        this.type = (String) map.getOrDefault("type", "no type");
+        this.type = (UserType) map.getOrDefault("type", UserType.NO_TYPE);
         this.profilePicture = (String) map.getOrDefault("profilePicture", "no profile picture");
         this.accountStatus = (String) map.getOrDefault("accountStatus", "no account_status");
+        if (type == UserType.REGULAR_USER) {
+            this.totalPoints = (Integer) map.getOrDefault("totalPoints", 0);
+            this.currentPoints = (Integer) map.getOrDefault("currentPoints", 0);
+            this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
+        }
     }
 
     public String getEmail() {
@@ -46,7 +69,7 @@ public class UserModel {
         return username;
     }
 
-    public String getType() {
+    public UserType getType() {
         return type;
     }
 
@@ -70,7 +93,7 @@ public class UserModel {
         this.username = username;
     }
 
-    public void setType(String type) {
+    public void setType(UserType type) {
         this.type = type;
     }
 
@@ -82,16 +105,47 @@ public class UserModel {
         this.accountStatus = accountStatus;
     }
 
+    public int getTotalPoints() {
+        return totalPoints;
+    }
+
+    public void setTotalPoints(int totalPoints) {
+        this.totalPoints = totalPoints;
+    }
+
+    public int getCurrentPoints() {
+        return currentPoints;
+    }
+
+    public void setCurrentPoints(int currentPoints) {
+        this.currentPoints = currentPoints;
+    }
+
+    public boolean isVipStatus() {
+        return vipStatus;
+    }
+
+    public void setVipStatus(boolean vipStatus) {
+        this.vipStatus = vipStatus;
+    }
+
     @Override
     public String toString() {
-        return "UserModel{" +
+        String s = "UserModel{" +
                 "email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", username='" + username + '\'' +
                 ", type='" + type + '\'' +
                 ", profilePicture='" + profilePicture + '\'' +
-                ", accountStatus='" + accountStatus + '\'' +
-                '}';
+                ", accountStatus='" + accountStatus + '\'';
+
+        if (type == UserType.REGULAR_USER)
+            s += ", totalPoints=" + totalPoints +
+                    ", currentPoints=" + currentPoints +
+                    ", vipStatus=" + vipStatus;
+
+        s += "}";
+        return s;
     }
 
     @Override
@@ -99,17 +153,26 @@ public class UserModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserModel userModel = (UserModel) o;
-        return Objects.equals(email, userModel.email) &&
+
+        boolean eq = Objects.equals(email, userModel.email) &&
                 Objects.equals(password, userModel.password) &&
                 Objects.equals(username, userModel.username) &&
                 Objects.equals(type, userModel.type) &&
                 Objects.equals(profilePicture, userModel.profilePicture) &&
                 Objects.equals(accountStatus, userModel.accountStatus);
+
+        if (type == UserType.REGULAR_USER) {
+            eq = eq && totalPoints == userModel.totalPoints &&
+                    currentPoints == userModel.currentPoints &&
+                    vipStatus == userModel.vipStatus;
+        }
+
+        return eq;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, password, username, type, profilePicture, accountStatus);
+        return Objects.hash(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
     }
 
     public Map<String, Object> getMap() {
@@ -121,6 +184,13 @@ public class UserModel {
         map.put("type", type);
         map.put("profilePicture", profilePicture);
         map.put("accountStatus", accountStatus);
+
+        if (type == UserType.REGULAR_USER) {
+            map.put("totalPoints", totalPoints);
+            map.put("currentPoints", currentPoints);
+            map.put("vipStatus", vipStatus);
+        }
+
         return map;
     }
 }
