@@ -70,10 +70,10 @@ public class UserModelTest {
         Map<String, Object> map = user.getMap();
 
         assertEquals(email, map.get("email"));
-        assertEquals(password, map.get("password_hash"));
+        assertEquals(password, map.get("password"));
         assertEquals(username, map.get("username"));
         assertEquals(type, map.get("type"));
-        assertEquals(profilePicture, map.get("profile_picture"));
-        assertEquals(accountStatus, map.get("account_status"));
+        assertEquals(profilePicture, map.get("profilePicture"));
+        assertEquals(accountStatus, map.get("accountStatus"));
     }
 }

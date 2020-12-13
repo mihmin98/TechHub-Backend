@@ -18,7 +18,7 @@ public class RegularUserModelTest {
         Map<String, Object> map = new HashMap<>();
         map.put("username", username);
         map.put("type", type);
-        map.put("total_points", totalPoints);
+        map.put("totalPoints", totalPoints);
 
         RegularUserModel regularUser = new RegularUserModel(map);
 
@@ -88,13 +88,13 @@ public class RegularUserModelTest {
         Map<String, Object> map = regularUser.getMap();
 
         assertEquals(email, map.get("email"));
-        assertEquals(password, map.get("password_hash"));
+        assertEquals(password, map.get("password"));
         assertEquals(username, map.get("username"));
         assertEquals(type, map.get("type"));
-        assertEquals(profilePicture, map.get("profile_picture"));
-        assertEquals(accountStatus, map.get("account_status"));
-        assertEquals(totalPoints, map.get("total_points"));
-        assertEquals(currentPoints, map.get("current_points"));
-        assertEquals(vipStatus, map.get("vip_status"));
+        assertEquals(profilePicture, map.get("profilePicture"));
+        assertEquals(accountStatus, map.get("accountStatus"));
+        assertEquals(totalPoints, map.get("totalPoints"));
+        assertEquals(currentPoints, map.get("currentPoints"));
+        assertEquals(vipStatus, map.get("vipStatus"));
     }
 }
