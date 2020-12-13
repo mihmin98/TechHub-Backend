@@ -19,6 +19,7 @@
 		<spring-cloud.version>2020.0.0-M5</spring-cloud.version>
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 		<java-jwt.version>3.11.0</java-jwt.version>
+		<firebase-admin.version>7.0.1</firebase-admin.version>
 	</properties>
 
 	<dependencies>
@@ -59,6 +60,11 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-gcp-starter-firestore</artifactId>
 			<version>1.2.6.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>${firebase-admin.version}</version>
 		</dependency>
 	</dependencies>
 
