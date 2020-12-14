@@ -47,7 +47,7 @@ public class UserModel {
         this.email = (String) map.getOrDefault("email", "no email");
         this.password = (String) map.getOrDefault("password", "no password");
         this.username = (String) map.getOrDefault("username", "no username");
-        this.type = (UserType) map.getOrDefault("type", UserType.NO_TYPE);
+        this.type = UserType.valueOf(map.getOrDefault("type", UserType.NO_TYPE).toString());
         this.profilePicture = (String) map.getOrDefault("profilePicture", "no profile picture");
         this.accountStatus = (String) map.getOrDefault("accountStatus", "no account_status");
         if (type == UserType.REGULAR_USER) {
@@ -184,6 +184,31 @@ public class UserModel {
         map.put("type", type);
         map.put("profilePicture", profilePicture);
         map.put("accountStatus", accountStatus);
+
+        if (type == UserType.REGULAR_USER) {
+            map.put("totalPoints", totalPoints);
+            map.put("currentPoints", currentPoints);
+            map.put("vipStatus", vipStatus);
+        }
+
+        return map;
+    }
+
+    public Map<String, Object> getMap(boolean includeEmptyFields) {
+        Map<String, Object> map = new HashMap<>();
+
+        if (email != null || includeEmptyFields)
+            map.put("email", email);
+        if (password != null || includeEmptyFields)
+            map.put("password", password);
+        if (username != null || includeEmptyFields)
+            map.put("username", username);
+        if (type != null || includeEmptyFields)
+            map.put("type", type);
+        if (profilePicture != null || includeEmptyFields)
+            map.put("profilePicture", profilePicture);
+        if (accountStatus != null || includeEmptyFields)
+            map.put("accountStatus", accountStatus);
 
         if (type == UserType.REGULAR_USER) {
             map.put("totalPoints", totalPoints);
