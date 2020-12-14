@@ -8,27 +8,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.concurrent.ExecutionException;
 
 @RestController
+@RequestMapping("/user")
 public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping("/getUserDetails")
-    public UserModel getUser(@RequestParam String name) throws InterruptedException, ExecutionException {
-        return userService.getUserDetails(name);
+    @GetMapping("{email}")
+    public UserModel getUser(@PathVariable("email") String email) throws InterruptedException, ExecutionException {
+        return userService.getUserDetails(email);
     }
 
-    @PostMapping("/createUser")
-    public String createUser(@RequestBody UserModel user) throws InterruptedException, ExecutionException {
-        return userService.saveUserDetails(user);
+    @PostMapping("")
+    public void createUser(@RequestBody UserModel user) throws InterruptedException, ExecutionException {
+        userService.saveUserDetails(user);
     }
 
-    @PutMapping("/updateUser")
-    public String updateUser(@RequestBody UserModel user) throws InterruptedException, ExecutionException {
-        return userService.updateUserDetails(user);
+    @PutMapping("{email}")
+    public void updateUser(@PathVariable("email") String email, @RequestBody UserModel user) throws InterruptedException, ExecutionException {
+        userService.updateUserDetails(email, user);
     }
 
-    @DeleteMapping("/deleteUser")
-    public String deleteUser(@RequestParam String name) {
-        return userService.deleteUser(name);
+    @DeleteMapping("{email}")
+    public void deleteUser(@PathVariable("email") String email) throws ExecutionException, InterruptedException {
+        userService.deleteUser(email);
     }
 }

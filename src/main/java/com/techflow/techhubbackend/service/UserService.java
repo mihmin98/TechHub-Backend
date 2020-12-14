@@ -4,22 +4,25 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
 import com.techflow.techhubbackend.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 //CRUD operations
 @Service
 public class UserService implements UserDetailsService {
+
     public static final String COL_NAME = "user";
 
     @Autowired
@@ -28,36 +31,66 @@ public class UserService implements UserDetailsService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public String saveUserDetails(UserModel user) throws InterruptedException, ExecutionException {
+    public void saveUserDetails(UserModel user) throws InterruptedException, ExecutionException {
+        // Check if user already exists
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(user.getEmail());
+        ApiFuture<DocumentSnapshot> future = documentReference.get();
+        if (future.get().exists()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
+        }
+
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.getMap());
-        return collectionsApiFuture.get().getUpdateTime().toString();
+        dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.getMap());
     }
 
-    public UserModel getUserDetails(String username) throws InterruptedException, ExecutionException {
-        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(username);
+    public UserModel getUserDetails(String email) throws InterruptedException, ExecutionException {
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(email);
         ApiFuture<DocumentSnapshot> future = documentReference.get();
 
         DocumentSnapshot document = future.get();
 
-        UserModel user = null;
-
         if (document.exists()) {
-            user = document.toObject(UserModel.class);
+            UserModel user = new UserModel(Objects.requireNonNull(document.getData()));
+            user.setPassword("");
             return user;
         } else {
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
 
-    public String updateUserDetails(UserModel user) throws InterruptedException, ExecutionException {
-        ApiFuture<WriteResult> collectionsApiFuture = dbFirestore.collection(COL_NAME).document(user.getUsername()).set(user.getMap());
-        return collectionsApiFuture.get().getUpdateTime().toString();
+    public void updateUserDetails(String email, UserModel user) throws InterruptedException, ExecutionException {
+        // Check if user exists
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(email);
+        ApiFuture<DocumentSnapshot> future = documentReference.get();
+        if (!future.get().exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        // Check if password has changed
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        }
+
+        // Check if email has changed, if yes create a new document with previous contents, delete old document, and then update new document; maybe can optimize to not have to update
+        if (user.getEmail() != null && !user.getEmail().equals(email)) {
+            UserModel oldUser = new UserModel(Objects.requireNonNull(future.get().getData()));
+            oldUser.setEmail(user.getEmail());
+            saveUserDetails(oldUser);
+            deleteUser(email);
+        }
+
+        dbFirestore.collection(COL_NAME).document(email).update(user.getMap(false));
     }
 
-    public String deleteUser(String username) {
-        ApiFuture<WriteResult> writeResult = dbFirestore.collection(COL_NAME).document(username).delete();
-        return "Document with username " + username + " has been deleted";
+    public void deleteUser(String email) throws ExecutionException, InterruptedException {
+        // Check if user exists
+        DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(email);
+        ApiFuture<DocumentSnapshot> future = documentReference.get();
+        if (!future.get().exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        dbFirestore.collection(COL_NAME).document(email).delete();
     }
 
     @Override
@@ -67,7 +100,7 @@ public class UserService implements UserDetailsService {
 
         try {
             DocumentSnapshot document = future.get();
-            UserModel user = null;
+            UserModel user;
 
             if (document.exists()) {
                 user = document.toObject(UserModel.class);
