@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public void saveUserDetails(UserModel user) throws InterruptedException, ExecutionException {
+    public void saveUserDetails(UserModel user, boolean encodePassword) throws InterruptedException, ExecutionException {
         // Check if user already exists
         DocumentReference documentReference = dbFirestore.collection(COL_NAME).document(user.getEmail());
         ApiFuture<DocumentSnapshot> future = documentReference.get();
@@ -39,8 +39,10 @@ public class UserService implements UserDetailsService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
         }
 
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.getMap());
+        if (encodePassword)
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
+        dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.getMap()).get();
     }
 
     public UserModel getUserDetails(String email) throws InterruptedException, ExecutionException {
@@ -75,11 +77,13 @@ public class UserService implements UserDetailsService {
         if (user.getEmail() != null && !user.getEmail().equals(email)) {
             UserModel oldUser = new UserModel(Objects.requireNonNull(future.get().getData()));
             oldUser.setEmail(user.getEmail());
-            saveUserDetails(oldUser);
+            saveUserDetails(oldUser, false);
             deleteUser(email);
+
+            email = user.getEmail();
         }
 
-        dbFirestore.collection(COL_NAME).document(email).update(user.getMap(false));
+        dbFirestore.collection(COL_NAME).document(email).update(user.getMap(false)).get();
     }
 
     public void deleteUser(String email) throws ExecutionException, InterruptedException {
@@ -90,7 +94,7 @@ public class UserService implements UserDetailsService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        dbFirestore.collection(COL_NAME).document(email).delete();
+        dbFirestore.collection(COL_NAME).document(email).delete().get();
     }
 
     @Override

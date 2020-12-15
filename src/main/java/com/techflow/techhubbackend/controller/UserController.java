@@ -20,7 +20,7 @@ public class UserController {
 
     @PostMapping("")
     public void createUser(@RequestBody UserModel user) throws InterruptedException, ExecutionException {
-        userService.saveUserDetails(user);
+        userService.saveUserDetails(user, true);
     }
 
     @PutMapping("{email}")
