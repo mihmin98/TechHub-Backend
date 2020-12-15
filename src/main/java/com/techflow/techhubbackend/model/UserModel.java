@@ -43,6 +43,20 @@ public class UserModel {
         }
     }
 
+    public UserModel(UserModel userModel) {
+        this.email = userModel.getEmail();
+        this.password = userModel.getPassword();
+        this.username = userModel.getUsername();
+        this.type = userModel.getType();
+        this.profilePicture = userModel.getProfilePicture();
+        this.accountStatus = userModel.getAccountStatus();
+        if (type == UserType.REGULAR_USER) {
+            this.totalPoints = userModel.getTotalPoints();
+            this.currentPoints = userModel.getCurrentPoints();
+            this.vipStatus = userModel.isVipStatus();
+        }
+    }
+
     public UserModel(Map<String, Object> map) {
         this.email = (String) map.getOrDefault("email", "no email");
         this.password = (String) map.getOrDefault("password", "no password");
