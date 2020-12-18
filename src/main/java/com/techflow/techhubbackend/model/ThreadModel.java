@@ -1,5 +1,7 @@
 package com.techflow.techhubbackend.model;
 
+import com.google.cloud.Timestamp;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +39,7 @@ public class ThreadModel {
         this.title = (String) map.getOrDefault("title", "no title");
         this.category = (String) map.getOrDefault("category", "No Category");
         this.text = (String) map.getOrDefault("text", "no text");
-        this.dateCreated = (Date) map.getOrDefault("dateCreated", null);
+        //this.dateCreated = ((Timestamp) map.getOrDefault("dateCreated", null)).toDate();
     }
 
     public String getOwnerEmail() {
@@ -80,6 +82,11 @@ public class ThreadModel {
         this.dateCreated = dateCreated;
     }
 
+    public ThreadModel builderSetDateCreated(Timestamp dateCreated) {
+        this.dateCreated = dateCreated.toDate();
+        return this;
+    }
+
     @Override
     public String toString() {
         return "ThreadModel{" +
@@ -118,7 +125,6 @@ public class ThreadModel {
         map.put("title", title);
         map.put("category", category);
         map.put("text", text);
-        map.put("dateCreated", dateCreated);
 
         return map;
     }
@@ -134,8 +140,6 @@ public class ThreadModel {
             map.put("category", category);
         if (text != null || includeEmptyFields)
             map.put("text", text);
-        if (dateCreated != null || includeEmptyFields)
-            map.put("dateCreated", dateCreated);
 
         return map;
     }
