@@ -118,7 +118,7 @@ public class ThreadModel {
                 dateCreated.equals(threadModel.dateCreated);
     }
 
-    public Map<String, Object> getMap() {
+    public Map<String, Object> generateMap() {
         Map<String, Object> map = new HashMap<>();
 
         map.put("ownerEmail", ownerEmail);
@@ -129,7 +129,7 @@ public class ThreadModel {
         return map;
     }
 
-    public Map<String, Object> getMap(boolean includeEmptyFields) {
+    public Map<String, Object> generateMap(boolean includeEmptyFields) {
         Map<String, Object> map = new HashMap<>();
 
         if (ownerEmail != null || includeEmptyFields)

@@ -53,7 +53,7 @@ public class ThreadService {
 
     public String createThread(ThreadModel thread) throws ExecutionException, InterruptedException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
-        documentReference.set(thread.getMap()).get();
+        documentReference.set(thread.generateMap()).get();
 
         return documentReference.getId();
     }
@@ -64,7 +64,7 @@ public class ThreadService {
         if (!documentReference.exists())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
 
-        dbFirestore.collection(COLLECTION_NAME).document(id).update(thread.getMap(false)).get();
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(thread.generateMap(false)).get();
     }
 
     public void deleteThread(String id) throws ExecutionException, InterruptedException {
