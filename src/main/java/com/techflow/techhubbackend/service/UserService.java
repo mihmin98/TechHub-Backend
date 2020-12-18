@@ -42,7 +42,7 @@ public class UserService implements UserDetailsService {
         if (encodePassword)
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
-        dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.getMap()).get();
+        dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.generateMap()).get();
     }
 
     public UserModel getUserDetails(String email) throws InterruptedException, ExecutionException {
@@ -83,7 +83,7 @@ public class UserService implements UserDetailsService {
             email = user.getEmail();
         }
 
-        dbFirestore.collection(COL_NAME).document(email).update(user.getMap(false)).get();
+        dbFirestore.collection(COL_NAME).document(email).update(user.generateMap(false)).get();
     }
 
     public void deleteUser(String email) throws ExecutionException, InterruptedException {

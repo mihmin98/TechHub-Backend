@@ -126,7 +126,7 @@ public class UserModelTest {
 
         UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus);
 
-        Map<String, Object> map = user.getMap();
+        Map<String, Object> map = user.generateMap();
 
         assertEquals(email, map.get("email"));
         assertEquals(password, map.get("password"));
@@ -150,7 +150,7 @@ public class UserModelTest {
 
         UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
 
-        Map<String, Object> map = user.getMap();
+        Map<String, Object> map = user.generateMap();
 
         assertEquals(email, map.get("email"));
         assertEquals(password, map.get("password"));

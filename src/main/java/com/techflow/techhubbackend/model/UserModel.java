@@ -189,7 +189,7 @@ public class UserModel {
         return Objects.hash(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
     }
 
-    public Map<String, Object> getMap() {
+    public Map<String, Object> generateMap() {
         Map<String, Object> map = new HashMap<>();
 
         map.put("email", email);
@@ -208,7 +208,7 @@ public class UserModel {
         return map;
     }
 
-    public Map<String, Object> getMap(boolean includeEmptyFields) {
+    public Map<String, Object> generateMap(boolean includeEmptyFields) {
         Map<String, Object> map = new HashMap<>();
 
         if (email != null || includeEmptyFields)

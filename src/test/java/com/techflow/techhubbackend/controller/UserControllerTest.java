@@ -55,7 +55,7 @@ public class UserControllerTest {
         testUser = new UserModel(testDataProperties.getUserEmail(), testDataProperties.getUserPassword(), testDataProperties.getUserUsername(), testDataProperties.getUserType(), testDataProperties.getUserProfilePicture(), testDataProperties.getUserAccountStatus());
 
         testUser.setPassword(bCryptPasswordEncoder.encode(testUser.getPassword()));
-        dbFirestore.collection(COLLECTION_NAME).document(testUser.getEmail()).set(testUser.getMap()).get();
+        dbFirestore.collection(COLLECTION_NAME).document(testUser.getEmail()).set(testUser.generateMap()).get();
         testUser.setPassword(testDataProperties.getUserPassword());
 
         // Login
@@ -147,7 +147,7 @@ public class UserControllerTest {
         // Create user then delete him
         UserModel deleteUser = new UserModel(testUser);
         deleteUser.setEmail(testDataProperties.getUserDeleteEmail());
-        dbFirestore.collection(COLLECTION_NAME).document(deleteUser.getEmail()).set(deleteUser.getMap()).get();
+        dbFirestore.collection(COLLECTION_NAME).document(deleteUser.getEmail()).set(deleteUser.generateMap()).get();
 
         mockMvc.perform(delete("/user/" + deleteUser.getEmail())
                 .header(SecurityConstants.HEADER_STRING, jwt))
@@ -175,7 +175,7 @@ public class UserControllerTest {
         putUser.setEmail(testDataProperties.getUserPutInitialEmail());
         putUser.setPassword(bCryptPasswordEncoder.encode(putUser.getPassword()));
 
-        dbFirestore.collection(COLLECTION_NAME).document(putUser.getEmail()).set(putUser.getMap()).get();
+        dbFirestore.collection(COLLECTION_NAME).document(putUser.getEmail()).set(putUser.generateMap()).get();
 
         // Try to update a field
         putUser = new UserModel();
