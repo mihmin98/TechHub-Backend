@@ -1,5 +1,7 @@
 package com.techflow.techhubbackend.model;
 
+import com.google.cloud.Timestamp;
+
 import java.util.*;
 
 public class PostModel {
@@ -44,11 +46,10 @@ public class PostModel {
         this.threadId=(String) map.getOrDefault("threadId","no thread id");
         this.postNumber=(Integer) map.getOrDefault("postNumber", 0);
         this.text=(String) map.getOrDefault("text", "no text");
-        this.dateCreated=(Date) map.getOrDefault("dateCreated","2018-05-11T17:24:42.980");
+        //this.dateCreated=(Date) map.getOrDefault("dateCreated","2018-05-11T17:24:42.980");
         this.hasTrophy=(Boolean) map.getOrDefault("hasTrophy", null);
         this.upvotes=new HashSet<String>((List<String>) map.getOrDefault("upvotes", null));
         this.downvotes=new HashSet<String>((List<String>) map.getOrDefault("downvotes", null));
-
     }
 
     public String getUserEmail() {
@@ -113,6 +114,11 @@ public class PostModel {
 
     public void setDownvotes(Set<String> downvotes) {
         this.downvotes = downvotes;
+    }
+
+    public PostModel builderSetDateCreated(Timestamp dateCreated) {
+        this.dateCreated = dateCreated.toDate();
+        return this;
     }
 
     @Override
