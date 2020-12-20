@@ -41,14 +41,14 @@ public class PostService {
             postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
             postModel.setDateCreated(Objects.requireNonNull(documentReference.getCreateTime()).toDate());
             return postModel;
-        }
-        else {
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
         }
     }
 
     public String createPost(PostModel postModel) throws ExecutionException, InterruptedException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
+        postModel.setId(documentReference.getId());
         documentReference.set(postModel.generateMap()).get();
 
         return documentReference.getId();

@@ -53,6 +53,7 @@ public class ThreadService {
 
     public String createThread(ThreadModel thread) throws ExecutionException, InterruptedException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
+        thread.setId(documentReference.getId());
         documentReference.set(thread.generateMap()).get();
 
         return documentReference.getId();
