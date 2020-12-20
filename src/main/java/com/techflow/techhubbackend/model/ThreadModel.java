@@ -9,6 +9,7 @@ import java.util.Objects;
 
 public class ThreadModel {
 
+    private String id;
     private String ownerEmail;
     private String title;
     private String category;
@@ -18,7 +19,8 @@ public class ThreadModel {
     public ThreadModel() {
     }
 
-    public ThreadModel(String ownerEmail, String title, String category, String text, Date dateCreated) {
+    public ThreadModel(String id, String ownerEmail, String title, String category, String text, Date dateCreated) {
+        this.id = id;
         this.ownerEmail = ownerEmail;
         this.title = title;
         this.category = category;
@@ -27,6 +29,7 @@ public class ThreadModel {
     }
 
     public ThreadModel(ThreadModel threadModel) {
+        this.id = threadModel.id;
         this.ownerEmail = threadModel.ownerEmail;
         this.title = threadModel.title;
         this.category = threadModel.category;
@@ -35,11 +38,19 @@ public class ThreadModel {
     }
 
     public ThreadModel(Map<String, Object> map) {
+        this.id = (String) map.getOrDefault("id", "no id");
         this.ownerEmail = (String) map.getOrDefault("ownerEmail", "no owner");
         this.title = (String) map.getOrDefault("title", "no title");
         this.category = (String) map.getOrDefault("category", "No Category");
         this.text = (String) map.getOrDefault("text", "no text");
-        //this.dateCreated = ((Timestamp) map.getOrDefault("dateCreated", null)).toDate();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getOwnerEmail() {
@@ -90,6 +101,7 @@ public class ThreadModel {
     @Override
     public String toString() {
         return "ThreadModel{" +
+                "id=\"" + id + "\", " +
                 "ownerEmail=\"" + ownerEmail + "\", " +
                 "title=\"" + title + "\", " +
                 "category=\"" + category + "\", " +
@@ -99,7 +111,7 @@ public class ThreadModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ownerEmail, title, category, text, dateCreated);
+        return Objects.hash(id, ownerEmail, title, category, text, dateCreated);
     }
 
     @Override
@@ -111,7 +123,8 @@ public class ThreadModel {
 
         ThreadModel threadModel = (ThreadModel) obj;
 
-        return ownerEmail.equals(threadModel.ownerEmail) &&
+        return id.equals(threadModel.id) &&
+                ownerEmail.equals(threadModel.ownerEmail) &&
                 title.equals(threadModel.title) &&
                 category.equals(threadModel.category) &&
                 text.equals(threadModel.text) &&
@@ -121,6 +134,7 @@ public class ThreadModel {
     public Map<String, Object> generateMap() {
         Map<String, Object> map = new HashMap<>();
 
+        map.put("id", id);
         map.put("ownerEmail", ownerEmail);
         map.put("title", title);
         map.put("category", category);
@@ -132,6 +146,8 @@ public class ThreadModel {
     public Map<String, Object> generateMap(boolean includeEmptyFields) {
         Map<String, Object> map = new HashMap<>();
 
+        if (id != null || includeEmptyFields)
+            map.put("id", id);
         if (ownerEmail != null || includeEmptyFields)
             map.put("ownerEmail", ownerEmail);
         if (title != null || includeEmptyFields)

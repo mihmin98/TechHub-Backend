@@ -6,8 +6,9 @@ import java.util.*;
 
 public class PostModel {
 
+    private String id;
     private String userEmail;
-    private  String threadId;
+    private String threadId;
     private int postNumber;
     private String text;
     private Date dateCreated;
@@ -18,7 +19,8 @@ public class PostModel {
     public PostModel() {
     }
 
-    public PostModel(String userEmail, String threadId, int postNumber, String text, Date dateCreated, boolean hasTrophy, Set<String> upvotes, Set<String> downvotes) {
+    public PostModel(String id, String userEmail, String threadId, int postNumber, String text, Date dateCreated, boolean hasTrophy, Set<String> upvotes, Set<String> downvotes) {
+        this.id = id;
         this.userEmail = userEmail;
         this.threadId = threadId;
         this.postNumber = postNumber;
@@ -29,27 +31,31 @@ public class PostModel {
         this.downvotes = downvotes;
     }
 
-    public PostModel(PostModel postModel)
-    {
-        this.userEmail=postModel.getUserEmail();
-        this.threadId=postModel.getThreadId();
-        this.postNumber=postModel.getPostNumber();
-        this.text=postModel.getText();
-        this.dateCreated=postModel.getDateCreated();
-        this.hasTrophy=postModel.isHasTrophy();
-        this.upvotes=postModel.getUpvotes();
-        this.downvotes=postModel.getDownvotes();
+    public PostModel(PostModel postModel) {
+        this.id = postModel.getId();
+        this.userEmail = postModel.getUserEmail();
+        this.threadId = postModel.getThreadId();
+        this.postNumber = postModel.getPostNumber();
+        this.text = postModel.getText();
+        this.dateCreated = postModel.getDateCreated();
+        this.hasTrophy = postModel.isHasTrophy();
+        this.upvotes = postModel.getUpvotes();
+        this.downvotes = postModel.getDownvotes();
     }
 
     public PostModel(Map<String, Object> map) {
+        this.id = (String) map.getOrDefault("id", "no id");
         this.userEmail = (String) map.getOrDefault("userEmail", "no email");
-        this.threadId=(String) map.getOrDefault("threadId","no thread id");
-        this.postNumber=(Integer) map.getOrDefault("postNumber", 0);
-        this.text=(String) map.getOrDefault("text", "no text");
-        //this.dateCreated=(Date) map.getOrDefault("dateCreated","2018-05-11T17:24:42.980");
-        this.hasTrophy=(Boolean) map.getOrDefault("hasTrophy", null);
-        this.upvotes=new HashSet<String>((List<String>) map.getOrDefault("upvotes", null));
-        this.downvotes=new HashSet<String>((List<String>) map.getOrDefault("downvotes", null));
+        this.threadId = (String) map.getOrDefault("threadId", "no thread id");
+        this.postNumber = (Integer) map.getOrDefault("postNumber", 0);
+        this.text = (String) map.getOrDefault("text", "no text");
+        this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", null);
+        this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", null));
+        this.downvotes = new HashSet<String>((List<String>) map.getOrDefault("downvotes", null));
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getUserEmail() {
@@ -82,6 +88,10 @@ public class PostModel {
 
     public Set<String> getDownvotes() {
         return downvotes;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setUserEmail(String userEmail) {
@@ -124,7 +134,8 @@ public class PostModel {
     @Override
     public String toString() {
         return "PostModel{" +
-                "userEmail='" + userEmail + '\'' +
+                "id='" + id + '\'' +
+                ", userEmail='" + userEmail + '\'' +
                 ", threadId='" + threadId + '\'' +
                 ", postNumber=" + postNumber +
                 ", text='" + text + '\'' +
@@ -140,7 +151,8 @@ public class PostModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PostModel postModel = (PostModel) o;
-        return postNumber == postModel.postNumber &&
+        return id.equals(postModel.id) &&
+                postNumber == postModel.postNumber &&
                 hasTrophy == postModel.hasTrophy &&
                 Objects.equals(userEmail, postModel.userEmail) &&
                 Objects.equals(threadId, postModel.threadId) &&
@@ -152,12 +164,13 @@ public class PostModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userEmail, threadId, postNumber, text, dateCreated, hasTrophy, upvotes, downvotes);
+        return Objects.hash(id, userEmail, threadId, postNumber, text, dateCreated, hasTrophy, upvotes, downvotes);
     }
 
     public Map<String, Object> generateMap() {
         Map<java.lang.String, java.lang.Object> map = new HashMap<>();
 
+        map.put("id", id);
         map.put("userEmail", userEmail);
         map.put("threadId", threadId);
         map.put("postNumber", postNumber);
@@ -173,6 +186,8 @@ public class PostModel {
     public Map<String, Object> generateMap(boolean includeEmptyFields) {
         Map<String, Object> map = new HashMap<>();
 
+        if (id != null || includeEmptyFields)
+            map.put("id", id);
         if (userEmail != null || includeEmptyFields)
             map.put("userEmail", userEmail);
         if (threadId != null || includeEmptyFields)
