@@ -45,3 +45,5 @@ target/
 
 # Firestore credentials
 firestore-credentials.json
+
+.vscode
