@@ -20,6 +20,11 @@ public class ThreadController {
     @Autowired
     PostService postService;
 
+    @GetMapping("/title/{title}")
+    public List<ThreadModel> getThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException{
+        return threadService.getThreadsByTitle(title);
+    }
+
     @GetMapping("")
     public List<ThreadModel> getAllThreads() throws ExecutionException, InterruptedException {
         return threadService.getAllThreads();
