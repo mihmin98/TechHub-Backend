@@ -9,7 +9,7 @@ public class PostModel {
     private String id;
     private String userEmail;
     private String threadId;
-    private int postNumber;
+    private Long postNumber;
     private String text;
     private Date dateCreated;
     private Boolean hasTrophy;
@@ -19,7 +19,7 @@ public class PostModel {
     public PostModel() {
     }
 
-    public PostModel(String id, String userEmail, String threadId, int postNumber, String text, Date dateCreated, boolean hasTrophy, Set<String> upvotes, Set<String> downvotes) {
+    public PostModel(String id, String userEmail, String threadId, Long postNumber, String text, Date dateCreated, boolean hasTrophy, Set<String> upvotes, Set<String> downvotes) {
         this.id = id;
         this.userEmail = userEmail;
         this.threadId = threadId;
@@ -47,7 +47,7 @@ public class PostModel {
         this.id = (String) map.getOrDefault("id", "no id");
         this.userEmail = (String) map.getOrDefault("userEmail", "no email");
         this.threadId = (String) map.getOrDefault("threadId", "no thread id");
-        this.postNumber = (Integer) map.getOrDefault("postNumber", 0);
+        this.postNumber = (Long) map.getOrDefault("postNumber", 0);
         this.text = (String) map.getOrDefault("text", "no text");
         this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", null);
         this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", null));
@@ -66,7 +66,7 @@ public class PostModel {
         return threadId;
     }
 
-    public int getPostNumber() {
+    public Long getPostNumber() {
         return postNumber;
     }
 
@@ -102,7 +102,7 @@ public class PostModel {
         this.threadId = threadId;
     }
 
-    public void setPostNumber(int postNumber) {
+    public void setPostNumber(Long postNumber) {
         this.postNumber = postNumber;
     }
 
@@ -152,7 +152,7 @@ public class PostModel {
         if (o == null || getClass() != o.getClass()) return false;
         PostModel postModel = (PostModel) o;
         return id.equals(postModel.id) &&
-                postNumber == postModel.postNumber &&
+                postNumber.equals(postModel.postNumber) &&
                 hasTrophy == postModel.hasTrophy &&
                 Objects.equals(userEmail, postModel.userEmail) &&
                 Objects.equals(threadId, postModel.threadId) &&
