@@ -41,7 +41,7 @@ public class ThreadController {
     }
 
     @PutMapping("{id}")
-    public void updateThread(@PathVariable("id") String id, ThreadModel thread) throws ExecutionException, InterruptedException {
+    public void updateThread(@PathVariable("id") String id, @RequestBody ThreadModel thread) throws ExecutionException, InterruptedException {
         threadService.updateThread(id, thread);
     }
 
