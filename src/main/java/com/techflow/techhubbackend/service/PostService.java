@@ -81,7 +81,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    public long getPostsCountByThreadId(String threadId) throws ExecutionException, InterruptedException {
+    public Long getPostsCountByThreadId(String threadId) throws ExecutionException, InterruptedException {
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("threadId", threadId).get().get().getDocuments();
 
         return documentSnapshots.stream()
