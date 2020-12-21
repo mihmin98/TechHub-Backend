@@ -1,6 +1,8 @@
 package com.techflow.techhubbackend.controller;
 
+import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
+import com.techflow.techhubbackend.service.PostService;
 import com.techflow.techhubbackend.service.ThreadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,9 @@ public class ThreadController {
 
     @Autowired
     ThreadService threadService;
+
+    @Autowired
+    PostService postService;
 
     @GetMapping("")
     public List<ThreadModel> getAllThreads() throws ExecutionException, InterruptedException {
@@ -48,5 +53,15 @@ public class ThreadController {
     @GetMapping("/categories/{category}")
     public List<ThreadModel> getThreadsByCategory(@PathVariable("category") String category) throws ExecutionException, InterruptedException {
         return threadService.getThreadsByCategory(category);
+    }
+
+    @GetMapping("{id}/posts")
+    public List<PostModel> getPostsByThreadId(@PathVariable("id") String threadId) throws ExecutionException, InterruptedException {
+        return postService.getPostsByThreadId(threadId);
+    }
+
+    @GetMapping("{id}/postsCount")
+    public Long getPostsCountByThreadId(@PathVariable("id") String threadId) throws ExecutionException, InterruptedException {
+        return postService.getPostsCountByThreadId(threadId);
     }
 }
