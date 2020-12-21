@@ -71,4 +71,22 @@ public class PostService {
 
         dbFirestore.collection(COLLECTION_NAME).document(id).delete().get();
     }
+
+    public List<PostModel> getPostsByThreadId(Integer threadId) throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("threadId", threadId).get().get().getDocuments();
+
+        return documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
+                .map(mapTimestampEntry -> new PostModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    public long getPostsCountByThreadId(Integer threadId) throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("threadId", threadId).get().get().getDocuments();
+
+        return documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
+                .map(mapTimestampEntry -> new PostModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
+                .count();
+    }
 }
