@@ -31,7 +31,7 @@ public class PostController {
     }
 
     @PutMapping("{id}")
-    public void updatePost(@PathVariable("id") String id, PostModel post) throws ExecutionException, InterruptedException {
+    public void updatePost(@PathVariable("id") String id, @RequestBody PostModel post) throws ExecutionException, InterruptedException {
         postService.updatePost(id, post);
     }
 

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,6 +88,7 @@ public class ThreadService {
         return documentSnapshots.stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
                 .map(mapTimestampEntry -> new ThreadModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
+                .sorted(Comparator.comparing(ThreadModel::getDateCreated).reversed())
                 .collect(Collectors.toList());
     }
 }
