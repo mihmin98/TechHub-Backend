@@ -39,14 +39,4 @@ public class PostController {
     public void deletePost(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
         postService.deletePost(id);
     }
-
-    @GetMapping("/threads/{threadId}")
-    public List<PostModel> getPostsByThreadId(@PathVariable("threadId") Integer threadId) throws ExecutionException, InterruptedException {
-        return postService.getPostsByThreadId(threadId);
-    }
-
-    @GetMapping("/threadCount/{threadId}")
-    public Long getPostsCountByThreadId(@PathVariable("threadId") Integer threadId) throws ExecutionException, InterruptedException {
-        return postService.getPostsCountByThreadId(threadId);
-    }
 }
