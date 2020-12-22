@@ -21,7 +21,7 @@ public class ThreadController {
     PostService postService;
 
     @GetMapping("/title/{title}")
-    public List<ThreadModel> getThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException{
+    public List<ThreadModel> getThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException {
         return threadService.getThreadsByTitle(title);
     }
 

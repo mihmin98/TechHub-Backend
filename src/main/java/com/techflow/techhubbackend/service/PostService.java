@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     public static final String COLLECTION_NAME = "post";
+    public static final String THREAD_COLLECTION_NAME = "thread";
 
     @Autowired
     private Firestore dbFirestore;
@@ -50,7 +51,7 @@ public class PostService {
     public String createPost(PostModel postModel) throws ExecutionException, InterruptedException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         postModel.setId(documentReference.getId());
-        postModel.setPostNumber(getPostsCountByThreadId(postModel.getThreadId())+1);
+        postModel.setPostNumber(getPostsCountByThreadId(postModel.getThreadId()) + 1);
         documentReference.set(postModel.generateMap()).get();
 
         return documentReference.getId();
@@ -72,16 +73,15 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
 
         PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
-        Long postNumber=postModel.getPostNumber();
+        Long postNumber = postModel.getPostNumber();
 
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereGreaterThan("postNumber", postNumber).get().get().getDocuments();
         List<PostModel> postsToUpdate = documentSnapshots.stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
                 .map(mapTimestampEntry -> new PostModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
                 .collect(Collectors.toList());
-        for (PostModel postToUpdate : postsToUpdate)
-        {
-            postToUpdate.setPostNumber(postToUpdate.getPostNumber()-1);
+        for (PostModel postToUpdate : postsToUpdate) {
+            postToUpdate.setPostNumber(postToUpdate.getPostNumber() - 1);
             updatePost(postToUpdate.getId(), postToUpdate);
         }
 
@@ -89,16 +89,26 @@ public class PostService {
     }
 
     public List<PostModel> getPostsByThreadId(String threadId) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentReference = dbFirestore.collection(THREAD_COLLECTION_NAME).document(threadId).get().get();
+
+        if (!documentReference.exists())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("threadId", threadId).get().get().getDocuments();
 
         return documentSnapshots.stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
                 .map(mapTimestampEntry -> new PostModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
-                .sorted(Comparator.comparing(PostModel::getDateCreated).reversed())
+                .sorted(Comparator.comparing(PostModel::getDateCreated))
                 .collect(Collectors.toList());
     }
 
     public Long getPostsCountByThreadId(String threadId) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentReference = dbFirestore.collection(THREAD_COLLECTION_NAME).document(threadId).get().get();
+
+        if (!documentReference.exists())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("threadId", threadId).get().get().getDocuments();
 
         return documentSnapshots.stream()

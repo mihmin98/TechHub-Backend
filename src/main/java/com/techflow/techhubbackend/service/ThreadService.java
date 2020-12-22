@@ -43,16 +43,13 @@ public class ThreadService {
 
         List<ThreadModel> returnList = new ArrayList<>();
 
-        for(var thread : convertedList)
-        {
+        for (var thread : convertedList) {
             Pattern pattern = Pattern.compile(title);
             Matcher matcherTitle = pattern.matcher(thread.getTitle());
             Matcher matcherText = pattern.matcher(thread.getText());
-            if(matcherTitle.find()
-                || matcherText.find())
-                {
-                    returnList.add(thread);
-                }
+            if (matcherTitle.find() || matcherText.find()) {
+                returnList.add(thread);
+            }
         }
         return returnList;
     }
@@ -74,8 +71,7 @@ public class ThreadService {
             threadModel = new ThreadModel(Objects.requireNonNull(documentReference.getData()));
             threadModel.setDateCreated(Objects.requireNonNull(documentReference.getCreateTime()).toDate());
             return threadModel;
-        }
-        else {
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
         }
     }

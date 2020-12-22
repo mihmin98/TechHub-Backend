@@ -192,7 +192,7 @@ public class PostModel {
             map.put("userEmail", userEmail);
         if (threadId != null || includeEmptyFields)
             map.put("threadId", threadId);
-        if (postNumber != 0 || includeEmptyFields)
+        if (postNumber != null || includeEmptyFields)
             map.put("postNumber", postNumber);
         if (text != null || includeEmptyFields)
             map.put("text", text);
