@@ -223,7 +223,7 @@ public class PostControllerTest {
 
         // Create a post
         post.setId(documentReference.getId());
-        documentReference.set(post.generateMap());
+        documentReference.set(post.generateMap()).get();
 
         postsToDelete.add(documentReference.getId());
 
