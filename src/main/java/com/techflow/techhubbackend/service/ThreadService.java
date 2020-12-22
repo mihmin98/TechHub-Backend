@@ -8,23 +8,18 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.techflow.techhubbackend.config.ThreadCategoriesProperties;
+import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import java.util.Comparator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class ThreadService {
@@ -108,6 +103,19 @@ public class ThreadService {
 
         if (!documentReference.exists())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection("post").whereEqualTo("threadId", id).get().get().getDocuments();
+
+        documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
+                .map(mapTimestampEntry -> new PostModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
+                .forEach(postToDelete -> {
+                    try {
+                        dbFirestore.collection("post").document(postToDelete.getId()).delete().get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                });
 
         dbFirestore.collection(COLLECTION_NAME).document(id).delete().get();
     }
