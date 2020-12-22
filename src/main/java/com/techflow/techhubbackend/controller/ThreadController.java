@@ -1,5 +1,6 @@
 package com.techflow.techhubbackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
 import com.techflow.techhubbackend.service.PostService;
@@ -21,7 +22,7 @@ public class ThreadController {
     PostService postService;
 
     @GetMapping("/title/{title}")
-    public List<ThreadModel> getThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException{
+    public List<ThreadModel> getThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException {
         return threadService.getThreadsByTitle(title);
     }
 
@@ -36,7 +37,7 @@ public class ThreadController {
     }
 
     @PostMapping("")
-    public String createThread(@RequestBody ThreadModel thread) throws ExecutionException, InterruptedException {
+    public String createThread(@RequestBody ThreadModel thread) throws ExecutionException, InterruptedException, JsonProcessingException {
         return threadService.createThread(thread);
     }
 

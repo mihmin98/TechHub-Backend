@@ -1,5 +1,8 @@
 package com.techflow.techhubbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -43,16 +46,15 @@ public class ThreadService {
 
         List<ThreadModel> returnList = new ArrayList<>();
 
-        for(var thread : convertedList)
-        {
+        for (var thread : convertedList) {
+            if (thread.getTitle() == null)
+                 continue;
             Pattern pattern = Pattern.compile(title);
             Matcher matcherTitle = pattern.matcher(thread.getTitle());
             Matcher matcherText = pattern.matcher(thread.getText());
-            if(matcherTitle.find()
-                || matcherText.find())
-                {
-                    returnList.add(thread);
-                }
+            if (matcherTitle.find() || matcherText.find()) {
+                returnList.add(thread);
+            }
         }
         return returnList;
     }
@@ -74,18 +76,22 @@ public class ThreadService {
             threadModel = new ThreadModel(Objects.requireNonNull(documentReference.getData()));
             threadModel.setDateCreated(Objects.requireNonNull(documentReference.getCreateTime()).toDate());
             return threadModel;
-        }
-        else {
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
         }
     }
 
-    public String createThread(ThreadModel thread) throws ExecutionException, InterruptedException {
+    public String createThread(ThreadModel thread) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         thread.setId(documentReference.getId());
         documentReference.set(thread.generateMap()).get();
 
-        return documentReference.getId();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        node.put("threadId", documentReference.getId());
+
+        return mapper.writeValueAsString(node);
+
     }
 
     public void updateThread(String id, ThreadModel thread) throws ExecutionException, InterruptedException {
