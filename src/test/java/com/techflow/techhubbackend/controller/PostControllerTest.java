@@ -183,7 +183,7 @@ public class PostControllerTest {
         post.setThreadId(thread.getId());
         ObjectMapper mapper = new ObjectMapper();
 
-        String postId = mockMvc.perform(post("/post")
+        String postIdJson = mockMvc.perform(post("/post")
                 .header(SecurityConstants.HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(post))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -192,6 +192,7 @@ public class PostControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        String postId = (String) mapper.readValue(postIdJson, HashMap.class).get("postId");
         postsToDelete.add(postId);
 
         DocumentSnapshot documentSnapshot = dbFirestore.collection(POSTS_COLLECTION_NAME).document(postId).get().get();

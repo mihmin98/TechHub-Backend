@@ -1,5 +1,6 @@
 package com.techflow.techhubbackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class PostController {
     }
 
     @PostMapping("")
-    public String createPost(@RequestBody PostModel post) throws ExecutionException, InterruptedException {
+    public String createPost(@RequestBody PostModel post) throws ExecutionException, InterruptedException, JsonProcessingException {
         return postService.createPost(post);
     }
 

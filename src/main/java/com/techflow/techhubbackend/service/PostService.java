@@ -1,5 +1,8 @@
 package com.techflow.techhubbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -48,13 +51,17 @@ public class PostService {
         }
     }
 
-    public String createPost(PostModel postModel) throws ExecutionException, InterruptedException {
+    public String createPost(PostModel postModel) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         postModel.setId(documentReference.getId());
         postModel.setPostNumber(getPostsCountByThreadId(postModel.getThreadId()) + 1);
         documentReference.set(postModel.generateMap()).get();
 
-        return documentReference.getId();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        node.put("postId", documentReference.getId());
+
+        return mapper.writeValueAsString(node);
     }
 
     public void updatePost(String id, PostModel postModel) throws ExecutionException, InterruptedException {

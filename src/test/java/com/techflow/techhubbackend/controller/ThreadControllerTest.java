@@ -176,7 +176,7 @@ public class ThreadControllerTest {
         ThreadModel thread = new ThreadModel(testThreadModel);
         ObjectMapper mapper = new ObjectMapper();
 
-        String threadId = mockMvc.perform(post("/thread")
+        String threadIdJson = mockMvc.perform(post("/thread")
                 .header(SecurityConstants.HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(testThreadModel))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -185,6 +185,7 @@ public class ThreadControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        String threadId = (String) mapper.readValue(threadIdJson, HashMap.class).get("threadId");
         threadsToDelete.add(threadId);
 
         DocumentSnapshot document = dbFirestore.collection(THREADS_COLLECTION_NAME).document(threadId).get().get();
@@ -438,7 +439,7 @@ public class ThreadControllerTest {
         int maxRandom = alphanumeric.length();
 
         SecureRandom random = new SecureRandom();
-        for(int i = 0; i < 30; ++i) {
+        for(int i = 0; i < 20; ++i) {
             builder.append(alphanumeric.charAt(random.nextInt(maxRandom)));
         }
 
