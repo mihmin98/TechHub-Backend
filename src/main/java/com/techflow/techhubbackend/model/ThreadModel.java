@@ -46,7 +46,7 @@ public class ThreadModel {
         this.title = (String) map.getOrDefault("title", "no title");
         this.category = (String) map.getOrDefault("category", "No Category");
         this.text = (String) map.getOrDefault("text", "no text");
-        this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", "no trophy");
+        this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", false);
     }
 
     public String getId() {
