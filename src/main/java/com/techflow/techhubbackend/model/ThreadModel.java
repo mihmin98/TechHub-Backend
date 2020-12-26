@@ -15,17 +15,19 @@ public class ThreadModel {
     private String category;
     private String text;
     private Date dateCreated;
+    private Boolean hasTrophy;
 
     public ThreadModel() {
     }
 
-    public ThreadModel(String id, String ownerEmail, String title, String category, String text, Date dateCreated) {
+    public ThreadModel(String id, String ownerEmail, String title, String category, String text, Date dateCreated, Boolean hasTrophy) {
         this.id = id;
         this.ownerEmail = ownerEmail;
         this.title = title;
         this.category = category;
         this.text = text;
         this.dateCreated = dateCreated;
+        this.hasTrophy = hasTrophy;
     }
 
     public ThreadModel(ThreadModel threadModel) {
@@ -35,6 +37,7 @@ public class ThreadModel {
         this.category = threadModel.category;
         this.text = threadModel.text;
         this.dateCreated = threadModel.dateCreated;
+        this.hasTrophy = threadModel.hasTrophy;
     }
 
     public ThreadModel(Map<String, Object> map) {
@@ -43,6 +46,7 @@ public class ThreadModel {
         this.title = (String) map.getOrDefault("title", "no title");
         this.category = (String) map.getOrDefault("category", "No Category");
         this.text = (String) map.getOrDefault("text", "no text");
+        this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", "no trophy");
     }
 
     public String getId() {
@@ -93,6 +97,10 @@ public class ThreadModel {
         this.dateCreated = dateCreated;
     }
 
+    public Boolean getHasTrophy() { return hasTrophy; }
+
+    public void setHasTrophy(Boolean hasTrophy) { this.hasTrophy = hasTrophy; }
+
     public ThreadModel builderSetDateCreated(Timestamp dateCreated) {
         this.dateCreated = dateCreated.toDate();
         return this;
@@ -101,17 +109,19 @@ public class ThreadModel {
     @Override
     public String toString() {
         return "ThreadModel{" +
-                "id=\"" + id + "\", " +
-                "ownerEmail=\"" + ownerEmail + "\", " +
-                "title=\"" + title + "\", " +
-                "category=\"" + category + "\", " +
-                "text=\"" + text + "\", " +
-                "dateCreated=\"" + dateCreated + "\"}";
+                "id='" + id + '\'' +
+                ", ownerEmail='" + ownerEmail + '\'' +
+                ", title='" + title + '\'' +
+                ", category='" + category + '\'' +
+                ", text='" + text + '\'' +
+                ", dateCreated=" + dateCreated +
+                ", hasTrophy=" + hasTrophy +
+                '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ownerEmail, title, category, text, dateCreated);
+        return Objects.hash(id, ownerEmail, title, category, text, dateCreated, hasTrophy);
     }
 
     @Override
@@ -128,7 +138,8 @@ public class ThreadModel {
                 title.equals(threadModel.title) &&
                 category.equals(threadModel.category) &&
                 text.equals(threadModel.text) &&
-                dateCreated.equals(threadModel.dateCreated);
+                dateCreated.equals(threadModel.dateCreated) &&
+                hasTrophy == threadModel.hasTrophy;
     }
 
     public Map<String, Object> generateMap() {
@@ -139,6 +150,7 @@ public class ThreadModel {
         map.put("title", title);
         map.put("category", category);
         map.put("text", text);
+        map.put("hasTrophy", hasTrophy);
 
         return map;
     }
@@ -156,6 +168,8 @@ public class ThreadModel {
             map.put("category", category);
         if (text != null || includeEmptyFields)
             map.put("text", text);
+        if (text != null || includeEmptyFields)
+            map.put("hasTrophy", hasTrophy);
 
         return map;
     }
