@@ -139,7 +139,7 @@ public class ThreadModel {
                 category.equals(threadModel.category) &&
                 text.equals(threadModel.text) &&
                 dateCreated.equals(threadModel.dateCreated) &&
-                hasTrophy == threadModel.hasTrophy;
+                hasTrophy.equals(threadModel.hasTrophy);
     }
 
     public Map<String, Object> generateMap() {
