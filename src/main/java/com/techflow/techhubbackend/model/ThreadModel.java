@@ -168,7 +168,7 @@ public class ThreadModel {
             map.put("category", category);
         if (text != null || includeEmptyFields)
             map.put("text", text);
-        if (text != null || includeEmptyFields)
+        if (hasTrophy != null || includeEmptyFields)
             map.put("hasTrophy", hasTrophy);
 
         return map;
