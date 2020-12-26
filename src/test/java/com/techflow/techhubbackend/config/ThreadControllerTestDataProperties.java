@@ -20,6 +20,9 @@ public class ThreadControllerTestDataProperties {
     @Value("${thread.text}")
     private String threadText;
 
+    @Value("${thread.hasTrophy}")
+    private Boolean hasTrophy;
+
     @Value("${thread.put.text}")
     private String threadPutText;
 
@@ -58,6 +61,10 @@ public class ThreadControllerTestDataProperties {
         this.threadText = threadText;
     }
 
+    public Boolean getHasTrophy() { return hasTrophy; }
+
+    public void setHasTrophy(Boolean hasTrophy) { this.hasTrophy = hasTrophy; }
+
     public String getThreadPutText() {
         return threadPutText;
     }
@@ -65,4 +72,5 @@ public class ThreadControllerTestDataProperties {
     public void setThreadPutText(String threadPutText) {
         this.threadPutText = threadPutText;
     }
+
 }
