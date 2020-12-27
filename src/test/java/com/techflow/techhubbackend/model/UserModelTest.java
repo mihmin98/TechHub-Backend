@@ -90,9 +90,10 @@ public class UserModelTest {
         int totalPoints = 10;
         int differentTotalPoints = 0;
         int currentPoints = 10;
+        int trophies = 1;
         boolean vipStatus = false;
 
-        UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
+        UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints,trophies, vipStatus);
 
         // Check object of different class
         Object obj = new Object();
@@ -102,7 +103,7 @@ public class UserModelTest {
         assertEquals(true, user.equals(user));
 
         // Check object with same field values
-        UserModel regularUser2 = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
+        UserModel regularUser2 = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, trophies, vipStatus);
         assertEquals(true, user.equals(regularUser2));
 
         // Check object with different superclass field values
@@ -146,9 +147,10 @@ public class UserModelTest {
         String accountStatus = "account";
         int totalPoints = 10;
         int currentPoints = 10;
+        int trophies = 1;
         boolean vipStatus = false;
 
-        UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
+        UserModel user = new UserModel(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, trophies, vipStatus);
 
         Map<String, Object> map = user.generateMap();
 
@@ -160,6 +162,7 @@ public class UserModelTest {
         assertEquals(accountStatus, map.get("accountStatus"));
         assertEquals(totalPoints, map.get("totalPoints"));
         assertEquals(currentPoints, map.get("currentPoints"));
+        assertEquals(trophies, map.get("trophies"));
         assertEquals(vipStatus, map.get("vipStatus"));
     }
 }

@@ -5,6 +5,7 @@ import com.techflow.techhubbackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -31,5 +32,10 @@ public class UserController {
     @DeleteMapping("{email}")
     public void deleteUser(@PathVariable("email") String email) throws ExecutionException, InterruptedException {
         userService.deleteUser(email);
+    }
+
+    @GetMapping("sortByScore/{userCount}")
+    public List<UserModel> SortUsersByPointsAndTrophies(@PathVariable("userCount") Integer userCount) throws InterruptedException, ExecutionException {
+        return userService.SortUsersByPointsAndTrophies(userCount);
     }
 }
