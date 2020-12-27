@@ -47,6 +47,7 @@ public class UserModelTest {
         assertEquals("no account_status", user.getAccountStatus());
         assertEquals(totalPoints, user.getTotalPoints());
         assertEquals(0, user.getCurrentPoints());
+        assertEquals(0, user.getTrophies());
         assertFalse(user.isVipStatus());
     }
 
