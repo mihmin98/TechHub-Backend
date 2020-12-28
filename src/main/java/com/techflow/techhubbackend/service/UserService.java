@@ -4,7 +4,9 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.techflow.techhubbackend.model.UserModel;
+import com.techflow.techhubbackend.model.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
@@ -16,8 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 //CRUD operations
 @Service
@@ -117,5 +122,18 @@ public class UserService implements UserDetailsService {
         }
 
         throw new UsernameNotFoundException(username);
+    }
+
+    public List<UserModel> SortUsersByPointsAndTrophies(Integer userCount) throws ExecutionException, InterruptedException
+    {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COL_NAME).whereEqualTo("type", UserType.REGULAR_USER.toString()).get().get().getDocuments();
+
+        documentSnapshots.stream().map(QueryDocumentSnapshot::getData).forEach(System.out::println);
+
+        return documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> new UserModel(queryDocumentSnapshot.getData()))
+                .sorted(Comparator.reverseOrder())
+                .limit(userCount)
+                .collect(Collectors.toList());
     }
 }

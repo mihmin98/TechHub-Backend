@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class UserModel {
+public class UserModel implements Comparable<UserModel>{
 
     protected String email;
     protected String password;
@@ -14,6 +14,7 @@ public class UserModel {
     protected String accountStatus;
     private int totalPoints;
     private int currentPoints;
+    private int trophies;
     private boolean vipStatus;
 
     public UserModel() {
@@ -29,7 +30,7 @@ public class UserModel {
     }
 
     public UserModel(String email, String password, String username, UserType type, String profilePicture,
-                     String accountStatus, int totalPoints, int currentPoints, boolean vipStatus) {
+                     String accountStatus, int totalPoints, int currentPoints, int trophies, boolean vipStatus) {
         this.email = email;
         this.password = password;
         this.username = username;
@@ -39,6 +40,7 @@ public class UserModel {
         if (type == UserType.REGULAR_USER) {
             this.totalPoints = totalPoints;
             this.currentPoints = currentPoints;
+            this.trophies = trophies;
             this.vipStatus = vipStatus;
         }
     }
@@ -53,6 +55,7 @@ public class UserModel {
         if (type == UserType.REGULAR_USER) {
             this.totalPoints = userModel.getTotalPoints();
             this.currentPoints = userModel.getCurrentPoints();
+            this.trophies=userModel.trophies;
             this.vipStatus = userModel.isVipStatus();
         }
     }
@@ -65,8 +68,9 @@ public class UserModel {
         this.profilePicture = (String) map.getOrDefault("profilePicture", "no profile picture");
         this.accountStatus = (String) map.getOrDefault("accountStatus", "no account_status");
         if (type == UserType.REGULAR_USER) {
-            this.totalPoints = (Integer) map.getOrDefault("totalPoints", 0);
-            this.currentPoints = (Integer) map.getOrDefault("currentPoints", 0);
+            this.totalPoints = ((Long) map.getOrDefault("totalPoints", 0)).intValue();
+            this.currentPoints = ((Long) map.getOrDefault("currentPoints", 0)).intValue();
+            this.trophies = ((Long) map.getOrDefault("trophies", 0)).intValue();
             this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
         }
     }
@@ -135,6 +139,10 @@ public class UserModel {
         this.currentPoints = currentPoints;
     }
 
+    public int getTrophies() { return trophies; }
+
+    public void setTrophies(int trophies) { this.trophies = trophies; }
+
     public boolean isVipStatus() {
         return vipStatus;
     }
@@ -156,6 +164,7 @@ public class UserModel {
         if (type == UserType.REGULAR_USER)
             s += ", totalPoints=" + totalPoints +
                     ", currentPoints=" + currentPoints +
+                    ", trophies=" + trophies +
                     ", vipStatus=" + vipStatus;
 
         s += "}";
@@ -178,6 +187,7 @@ public class UserModel {
         if (type == UserType.REGULAR_USER) {
             eq = eq && totalPoints == userModel.totalPoints &&
                     currentPoints == userModel.currentPoints &&
+                    trophies == userModel.trophies &&
                     vipStatus == userModel.vipStatus;
         }
 
@@ -186,7 +196,7 @@ public class UserModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, vipStatus);
+        return Objects.hash(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, trophies, vipStatus);
     }
 
     public Map<String, Object> generateMap() {
@@ -202,6 +212,7 @@ public class UserModel {
         if (type == UserType.REGULAR_USER) {
             map.put("totalPoints", totalPoints);
             map.put("currentPoints", currentPoints);
+            map.put("trophies", trophies);
             map.put("vipStatus", vipStatus);
         }
 
@@ -227,9 +238,18 @@ public class UserModel {
         if (type == UserType.REGULAR_USER) {
             map.put("totalPoints", totalPoints);
             map.put("currentPoints", currentPoints);
+            map.put("trophies", trophies);
             map.put("vipStatus", vipStatus);
         }
 
         return map;
+    }
+
+    @Override
+    public int compareTo(UserModel userToCompare) {
+        int thisUserScore = totalPoints + trophies * 10;
+        int userToCompareScore = userToCompare.getTotalPoints() + userToCompare.getTrophies() * 10;
+
+        return thisUserScore - userToCompareScore;
     }
 }
