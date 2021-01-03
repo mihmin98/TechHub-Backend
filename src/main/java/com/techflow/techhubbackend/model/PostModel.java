@@ -50,8 +50,8 @@ public class PostModel {
         this.postNumber = (Long) map.getOrDefault("postNumber", 0);
         this.text = (String) map.getOrDefault("text", "no text");
         this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", null);
-        this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", null));
-        this.downvotes = new HashSet<String>((List<String>) map.getOrDefault("downvotes", null));
+        this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", new ArrayList<String>()));
+        this.downvotes = new HashSet<String>((List<String>) map.getOrDefault("downvotes", new ArrayList<String>()));
     }
 
     public String getId() {
@@ -79,6 +79,9 @@ public class PostModel {
     }
 
     public Boolean isHasTrophy() {
+        if (hasTrophy == null) {
+            return false;
+        }
         return hasTrophy;
     }
 
@@ -177,8 +180,12 @@ public class PostModel {
         map.put("text", text);
         map.put("dateCreated", dateCreated);
         map.put("hasTrophy", hasTrophy);
-        map.put("upvotes", Arrays.asList(upvotes.toArray()));
-        map.put("downvotes", Arrays.asList(downvotes.toArray()));
+        if(upvotes != null) {
+            map.put("upvotes", Arrays.asList(upvotes.toArray()));
+        }
+        if(downvotes != null){
+            map.put("downvotes", Arrays.asList(downvotes.toArray()));
+        }
 
         return map;
     }
@@ -200,9 +207,9 @@ public class PostModel {
             map.put("dateCreated", dateCreated);
         if (hasTrophy != null || includeEmptyFields)
             map.put("hasTrophy", hasTrophy);
-        if (upvotes.isEmpty() || includeEmptyFields)
+        if (upvotes != null || includeEmptyFields)
             map.put("upvotes", Arrays.asList(upvotes.toArray()));
-        if (downvotes.isEmpty() || includeEmptyFields)
+        if (downvotes != null || includeEmptyFields)
             map.put("downvotes", Arrays.asList(downvotes.toArray()));
 
         return map;
