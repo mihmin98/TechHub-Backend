@@ -50,8 +50,9 @@ public class PostModel {
         this.postNumber = (Long) map.getOrDefault("postNumber", 0);
         this.text = (String) map.getOrDefault("text", "no text");
         this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", null);
-        this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", null));
-        this.downvotes = new HashSet<String>((List<String>) map.getOrDefault("downvotes", null));
+        List<String> emptyList = new ArrayList<String>();
+        this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", emptyList));
+        this.downvotes = new HashSet<String>((List<String>) map.getOrDefault("downvotes", emptyList));
     }
 
     public String getId() {
