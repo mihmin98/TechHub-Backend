@@ -34,6 +34,7 @@ public class ThreadService {
 
     public List<ThreadModel> getThreadsByTitle(String title) throws ExecutionException, InterruptedException {
 
+        title = title.toLowerCase();
         List<ThreadModel> convertedList = dbFirestore.collection(COLLECTION_NAME).get().get().getDocuments().stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
                 .map(mapTimestampEntry -> new ThreadModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
@@ -45,8 +46,8 @@ public class ThreadService {
             if (thread.getTitle() == null)
                  continue;
             Pattern pattern = Pattern.compile(title);
-            Matcher matcherTitle = pattern.matcher(thread.getTitle());
-            Matcher matcherText = pattern.matcher(thread.getText());
+            Matcher matcherTitle = pattern.matcher(thread.getTitle().toLowerCase());
+            Matcher matcherText = pattern.matcher(thread.getText().toLowerCase());
             if (matcherTitle.find() || matcherText.find()) {
                 returnList.add(thread);
             }
