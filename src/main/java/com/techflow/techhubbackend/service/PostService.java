@@ -8,6 +8,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.techflow.techhubbackend.model.PostModel;
+import com.techflow.techhubbackend.model.ThreadModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class PostService {
 
     public static final String COLLECTION_NAME = "post";
     public static final String THREAD_COLLECTION_NAME = "thread";
+
+    @Autowired
+    ThreadService threadService;
 
     @Autowired
     private Firestore dbFirestore;
@@ -61,6 +65,13 @@ public class PostService {
         ObjectNode node = mapper.createObjectNode();
         node.put("postId", documentReference.getId());
 
+        if(postModel.isHasTrophy())
+        {
+            ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId()));
+            threadModel.setHasTrophy(true);
+            threadService.updateThread(postModel.getThreadId(), threadModel);
+        }
+
         return mapper.writeValueAsString(node);
     }
 
@@ -71,6 +82,14 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+
+        PostModel existentPostModel = getPost(id);
+        if(existentPostModel.isHasTrophy())
+        {
+            ThreadModel threadModel = new ThreadModel(threadService.getThread(existentPostModel.getThreadId()));
+            threadModel.setHasTrophy(true);
+            threadService.updateThread(existentPostModel.getThreadId(), threadModel);
+        }
     }
 
     public void deletePost(String id) throws ExecutionException, InterruptedException {
