@@ -9,15 +9,13 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
+import com.techflow.techhubbackend.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -26,9 +24,13 @@ public class PostService {
 
     public static final String COLLECTION_NAME = "post";
     public static final String THREAD_COLLECTION_NAME = "thread";
+    public static final String USER_COLLECTION_NAME = "user";
 
     @Autowired
     ThreadService threadService;
+
+    @Autowired
+    UserService userService;
 
     @Autowired
     private Firestore dbFirestore;
@@ -141,5 +143,43 @@ public class PostService {
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
                 .map(mapTimestampEntry -> new PostModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
                 .count();
+    }
+
+    public void upvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+
+        if (!documentReference.exists())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+
+        PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
+        Set<String> upvotes = postModel.getUpvotes();
+        upvotes.add(upvoteBy);
+        postModel.setUpvotes(upvotes);
+
+        UserModel userModel = userService.getUserDetails(postModel.getUserEmail());
+        userModel.setCurrentPoints(userModel.getCurrentPoints() + 1);
+        userModel.setTotalPoints(userModel.getTotalPoints() + 1);
+        userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+    }
+
+    public void downvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+
+        if (!documentReference.exists())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+
+        PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
+        Set<String> downvotes = postModel.getDownvotes();
+        downvotes.add(upvoteBy);
+        postModel.setDownvotes(downvotes);
+
+        UserModel userModel = userService.getUserDetails(postModel.getUserEmail());
+        userModel.setCurrentPoints(userModel.getCurrentPoints() - 1);
+        userModel.setTotalPoints(userModel.getTotalPoints() - 1);
+        userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
     }
 }

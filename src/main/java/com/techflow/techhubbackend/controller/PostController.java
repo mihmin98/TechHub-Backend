@@ -40,4 +40,14 @@ public class PostController {
     public void deletePost(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
         postService.deletePost(id);
     }
+
+    @PutMapping("{id}/upvote/{email}")
+    public void upvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
+        postService.upvotePost(id, email);
+    }
+
+    @PutMapping("{id}/downvote/{email}")
+    public void downvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
+        postService.downvotePost(id, email);
+    }
 }
