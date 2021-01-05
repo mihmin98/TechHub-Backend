@@ -1,11 +1,13 @@
 package com.techflow.techhubbackend.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.techflow.techhubbackend.config.UserControllerTestDataProperties;
 import com.techflow.techhubbackend.model.UserModel;
+import com.techflow.techhubbackend.model.UserType;
 import com.techflow.techhubbackend.security.SecurityConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,8 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,6 +50,8 @@ public class UserControllerTest {
     private UserModel testUser;
 
     private final String COLLECTION_NAME = "user";
+
+    private final List<UserModel> usersToDelete = new ArrayList<>();
 
     @BeforeAll
     void login() throws Exception {
@@ -242,11 +245,56 @@ public class UserControllerTest {
         assertEquals(testDataProperties.getUserPutChangedAccountStatus(), dbUser.getAccountStatus());
     }
 
+    @Test
+    void sortUsersByPointsAndTrophies() throws Exception {
+        assertEquals(testDataProperties.getUserSortPoints().size(), testDataProperties.getUserSortTrophies().size());
+        int length = testDataProperties.getUserSortPoints().size();
+
+        // Create Users
+        List<UserModel> users = new ArrayList<>();
+
+        for (int i = 0; i < length; ++i) {
+            UserModel toAdd = new UserModel(testUser);
+            toAdd.setType(UserType.REGULAR_USER);
+            toAdd.setEmail(toAdd.getEmail() + i);
+            toAdd.setTotalPoints(testDataProperties.getUserSortPoints().get(i));
+            toAdd.setTrophies(testDataProperties.getUserSortTrophies().get(i));
+
+            users.add(toAdd);
+            usersToDelete.add(toAdd);
+
+            dbFirestore.collection(COLLECTION_NAME).document(toAdd.getEmail()).set(toAdd.generateMap()).get();
+        }
+
+        // Sort the users
+        users.sort(Collections.reverseOrder());
+
+        // Receive the users from the database
+        String response = mockMvc.perform(get("/user/sortByScore/" + length)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<UserModel> receivedUsers = mapper.readValue(response, new TypeReference<>() {
+        });
+
+        assertEquals(users.size(), receivedUsers.size());
+
+        for (int i = 0; i < length; ++i)
+            assertEquals(users.get(i).getEmail(), receivedUsers.get(i).getEmail());
+    }
+
     @AfterAll
     void cleanup() throws ExecutionException, InterruptedException {
         dbFirestore.collection(COLLECTION_NAME).document(testUser.getEmail()).delete().get();
         dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPostEmail()).delete().get();
         dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutInitialEmail()).delete().get();
         dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutChangedEmail()).delete().get();
+
+        for (UserModel user : usersToDelete)
+            dbFirestore.collection(COLLECTION_NAME).document(user.getEmail()).delete().get();
     }
 }

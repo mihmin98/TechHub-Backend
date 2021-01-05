@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import java.util.List;
+
 @Configuration
 @PropertySource("classpath:UserControllerTest.properties")
 public class UserControllerTestDataProperties {
@@ -47,6 +49,12 @@ public class UserControllerTestDataProperties {
 
     @Value("${user.put.changedPassword}")
     private String userPutChangedPassword;
+
+    @Value("#{${user.sort.points}}")
+    private List<Integer> userSortPoints;
+
+    @Value("#{${user.sort.trophies}}")
+    private List<Integer> userSortTrophies;
 
     public UserControllerTestDataProperties() {
     }
@@ -157,5 +165,21 @@ public class UserControllerTestDataProperties {
 
     public void setUserPutChangedPassword(String userPutChangedPassword) {
         this.userPutChangedPassword = userPutChangedPassword;
+    }
+
+    public List<Integer> getUserSortPoints() {
+        return userSortPoints;
+    }
+
+    public void setUserSortPoints(List<Integer> userSortPoints) {
+        this.userSortPoints = userSortPoints;
+    }
+
+    public List<Integer> getUserSortTrophies() {
+        return userSortTrophies;
+    }
+
+    public void setUserSortTrophies(List<Integer> userSortTrophies) {
+        this.userSortTrophies = userSortTrophies;
     }
 }
