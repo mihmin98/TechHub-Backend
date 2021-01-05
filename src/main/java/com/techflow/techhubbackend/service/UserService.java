@@ -128,8 +128,6 @@ public class UserService implements UserDetailsService {
     public List<UserModel> SortUsersByPointsAndTrophies(Integer userCount) throws ExecutionException, InterruptedException {
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COL_NAME).whereEqualTo("type", UserType.REGULAR_USER.toString()).get().get().getDocuments();
 
-        documentSnapshots.stream().map(QueryDocumentSnapshot::getData).forEach(System.out::println);
-
         return documentSnapshots.stream()
                 .map(queryDocumentSnapshot -> new UserModel(queryDocumentSnapshot.getData()))
                 .sorted(Comparator.reverseOrder())
