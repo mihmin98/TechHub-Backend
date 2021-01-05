@@ -96,13 +96,23 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
+
+        String userEmail = ((User) authResult.getPrincipal()).getUsername();
+        String userType = null;
+        try {
+            userType = dbFirestore.collection("user").document(userEmail).get().get().getString("type");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
         String token = JWT.create()
                 .withSubject(((User) authResult.getPrincipal()).getUsername())
+                .withClaim("userType", userType)
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(HMAC512(SECRET.getBytes()));
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
-        node.put(JSON_TOKEN_KEY, TOKEN_PREFIX + token);
+        node.put(JSON_TOKEN_KEY, AUTH_TOKEN_PREFIX + token);
         String jsonToken = mapper.writeValueAsString(node);
 
         response.setContentType("application/json");

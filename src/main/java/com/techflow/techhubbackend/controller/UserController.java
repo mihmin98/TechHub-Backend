@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_HEADER_STRING;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -37,5 +39,10 @@ public class UserController {
     @GetMapping("sortByScore/{userCount}")
     public List<UserModel> SortUsersByPointsAndTrophies(@PathVariable("userCount") Integer userCount) throws InterruptedException, ExecutionException {
         return userService.SortUsersByPointsAndTrophies(userCount);
+    }
+
+    @GetMapping("")
+    public UserModel getCurrentUser(@RequestHeader(AUTH_HEADER_STRING) String jwt) throws InterruptedException, ExecutionException {
+        return userService.getCurrentUser(jwt);
     }
 }

@@ -107,7 +107,7 @@ public class PostControllerTest {
 
         // Get all posts
         String postsJson = mockMvc.perform(get("/post")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -137,7 +137,7 @@ public class PostControllerTest {
 
         // Try to get non existing post
         mockMvc.perform(get("/post/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         // Create a post
@@ -148,7 +148,7 @@ public class PostControllerTest {
 
         // Get post
         String postJson = mockMvc.perform(get("/post/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -184,7 +184,7 @@ public class PostControllerTest {
         ObjectMapper mapper = new ObjectMapper();
 
         String postIdJson = mockMvc.perform(post("/post")
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(post))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -216,7 +216,7 @@ public class PostControllerTest {
 
         // Try to PUT non existing post
         mockMvc.perform(put("/post/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content("{}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -232,7 +232,7 @@ public class PostControllerTest {
 
         // Try to update a field
         mockMvc.perform(put("/post/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putPost))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -267,7 +267,7 @@ public class PostControllerTest {
 
         // Try to DELETE non exisiting post
         mockMvc.perform(delete("/post/" + postDocumentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         // Create post
@@ -280,7 +280,7 @@ public class PostControllerTest {
 
         // DELETE post
         mockMvc.perform(delete("/post/" + postDocumentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk());
 
         assertFalse(postDocumentReference.get().get().exists());
@@ -303,7 +303,7 @@ public class PostControllerTest {
         int postToDeleteIndex = 1;
 
         mockMvc.perform(delete("/post/" + postsDocumentReference.get(postToDeleteIndex).getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk());
         postsDocumentReference.remove(postToDeleteIndex);
 

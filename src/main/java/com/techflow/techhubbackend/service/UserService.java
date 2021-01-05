@@ -1,5 +1,7 @@
 package com.techflow.techhubbackend.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -17,12 +19,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_TOKEN_PREFIX;
 
 //CRUD operations
 @Service
@@ -124,8 +125,7 @@ public class UserService implements UserDetailsService {
         throw new UsernameNotFoundException(username);
     }
 
-    public List<UserModel> SortUsersByPointsAndTrophies(Integer userCount) throws ExecutionException, InterruptedException
-    {
+    public List<UserModel> SortUsersByPointsAndTrophies(Integer userCount) throws ExecutionException, InterruptedException {
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COL_NAME).whereEqualTo("type", UserType.REGULAR_USER.toString()).get().get().getDocuments();
 
         documentSnapshots.stream().map(QueryDocumentSnapshot::getData).forEach(System.out::println);
@@ -135,5 +135,10 @@ public class UserService implements UserDetailsService {
                 .sorted(Comparator.reverseOrder())
                 .limit(userCount)
                 .collect(Collectors.toList());
+    }
+
+    public UserModel getCurrentUser(String jwt) throws ExecutionException, InterruptedException {
+        DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
+        return getUserDetails(decodedJWT.getSubject());
     }
 }

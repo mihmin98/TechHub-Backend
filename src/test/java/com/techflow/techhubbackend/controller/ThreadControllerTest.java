@@ -113,7 +113,7 @@ public class ThreadControllerTest {
 
         // Get all threads
         String threadsJson = mockMvc.perform(get("/thread")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -143,7 +143,7 @@ public class ThreadControllerTest {
 
         // Try to get non existing thread
         mockMvc.perform(get("/thread/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         // Create a thread
@@ -154,7 +154,7 @@ public class ThreadControllerTest {
 
         // Get thread
         String threadJson = mockMvc.perform(get("/thread/" + thread.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -178,7 +178,7 @@ public class ThreadControllerTest {
         ObjectMapper mapper = new ObjectMapper();
 
         String threadIdJson = mockMvc.perform(post("/thread")
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(testThreadModel))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -208,7 +208,7 @@ public class ThreadControllerTest {
 
         // Try to PUT non existing thread
         mockMvc.perform(put("/thread/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content("{}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -224,7 +224,7 @@ public class ThreadControllerTest {
 
         // Try to update a field
         mockMvc.perform(put("/thread/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putThread))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -248,7 +248,7 @@ public class ThreadControllerTest {
 
         // Try to DELETE non existing thread
         mockMvc.perform(delete("/thread/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         // Create a thread
@@ -259,7 +259,7 @@ public class ThreadControllerTest {
 
         // DELETE thread
         mockMvc.perform(delete("/thread/" + documentReference.getId())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk());
 
         assertFalse(documentReference.get().get().exists());
@@ -270,7 +270,7 @@ public class ThreadControllerTest {
         ObjectMapper mapper = new ObjectMapper();
 
         String categoriesJson = mockMvc.perform(get("/thread/categories")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -293,7 +293,7 @@ public class ThreadControllerTest {
 
         // Get all threads
         String threadsJson = mockMvc.perform(get("/thread/categories/" + threadCategoriesProperties.getCategories().get(0))
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -329,13 +329,13 @@ public class ThreadControllerTest {
         threadsToDelete.add(documentReference.getId());
 
         mockMvc.perform(get("/thread/" + documentReference.getId() + "/postsCount")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         documentReference.set(thread.generateMap()).get();
 
         receivedNumOfPosts = Long.parseLong(mockMvc.perform(get("/thread/" + documentReference.getId() + "/postsCount")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -358,7 +358,7 @@ public class ThreadControllerTest {
         }
 
         receivedNumOfPosts = Long.parseLong(mockMvc.perform(get("/thread/" + documentReference.getId() + "/postsCount")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -380,13 +380,13 @@ public class ThreadControllerTest {
         threadsToDelete.add(documentReference.getId());
 
         mockMvc.perform(get("/thread/" + documentReference.getId() + "/posts")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         documentReference.set(thread.generateMap()).get();
 
         receivedPostsJson = mockMvc.perform(get("/thread/" + documentReference.getId() + "/posts")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -413,7 +413,7 @@ public class ThreadControllerTest {
         }
 
         receivedPostsJson = mockMvc.perform(get("/thread/" + documentReference.getId() + "/posts")
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -449,7 +449,7 @@ public class ThreadControllerTest {
         String randomString = builder.toString();
 
         String responseJson = mockMvc.perform(get("/thread/title/" + randomString)
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -472,7 +472,7 @@ public class ThreadControllerTest {
         threadsToDelete.add(document.getId());
 
         responseJson = mockMvc.perform(get("/thread/title/" + randomString)
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()

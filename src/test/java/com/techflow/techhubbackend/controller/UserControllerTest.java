@@ -81,11 +81,11 @@ public class UserControllerTest {
         dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserInvalidEmail()).delete().get();
 
         mockMvc.perform(get("/user/" + testDataProperties.getUserInvalidEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         String userJson = mockMvc.perform(get("/user/" + testUser.getEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -141,7 +141,7 @@ public class UserControllerTest {
         dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserInvalidEmail()).delete().get();
 
         mockMvc.perform(delete("/user/" + testDataProperties.getUserInvalidEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         // Create user then delete him
@@ -150,7 +150,7 @@ public class UserControllerTest {
         dbFirestore.collection(COLLECTION_NAME).document(deleteUser.getEmail()).set(deleteUser.generateMap()).get();
 
         mockMvc.perform(delete("/user/" + deleteUser.getEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt))
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk());
 
         // Check if deleted document exists
@@ -165,7 +165,7 @@ public class UserControllerTest {
 
         // Try to PUT on non existing user
         mockMvc.perform(put("/user/" + testDataProperties.getUserInvalidEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content("{}")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -183,7 +183,7 @@ public class UserControllerTest {
         ObjectMapper mapper = new ObjectMapper();
 
         mockMvc.perform(put("/user/" + testDataProperties.getUserPutInitialEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putUser))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -203,7 +203,7 @@ public class UserControllerTest {
         putUser.setPassword(testDataProperties.getUserPutChangedPassword());
 
         mockMvc.perform(put("/user/" + testDataProperties.getUserPutInitialEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putUser))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -223,7 +223,7 @@ public class UserControllerTest {
         putUser.setEmail(testDataProperties.getUserPutChangedEmail());
 
         mockMvc.perform(put("/user/" + testDataProperties.getUserPutInitialEmail())
-                .header(SecurityConstants.HEADER_STRING, jwt)
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putUser))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
