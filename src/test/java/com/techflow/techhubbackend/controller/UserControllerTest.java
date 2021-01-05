@@ -9,7 +9,6 @@ import com.techflow.techhubbackend.config.UserControllerTestDataProperties;
 import com.techflow.techhubbackend.model.UserModel;
 import com.techflow.techhubbackend.model.UserType;
 import com.techflow.techhubbackend.security.SecurityConstants;
-import org.apache.catalina.User;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
