@@ -261,6 +261,7 @@ public class UserControllerTest {
             toAdd.setTrophies(testDataProperties.getUserSortTrophies().get(i));
 
             users.add(toAdd);
+            usersToDelete.add(toAdd);
 
             dbFirestore.collection(COLLECTION_NAME).document(toAdd.getEmail()).set(toAdd.generateMap()).get();
         }
