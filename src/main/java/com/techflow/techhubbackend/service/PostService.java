@@ -67,13 +67,6 @@ public class PostService {
         ObjectNode node = mapper.createObjectNode();
         node.put("postId", documentReference.getId());
 
-        if(postModel.isHasTrophy())
-        {
-            ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId()));
-            threadModel.setHasTrophy(true);
-            threadService.updateThread(postModel.getThreadId(), threadModel);
-        }
-
         return mapper.writeValueAsString(node);
     }
 
@@ -84,14 +77,6 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
-
-        PostModel existentPostModel = getPost(id);
-        if(existentPostModel.isHasTrophy())
-        {
-            ThreadModel threadModel = new ThreadModel(threadService.getThread(existentPostModel.getThreadId()));
-            threadModel.setHasTrophy(true);
-            threadService.updateThread(existentPostModel.getThreadId(), threadModel);
-        }
     }
 
     public void deletePost(String id) throws ExecutionException, InterruptedException {
@@ -207,5 +192,20 @@ public class PostService {
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+    }
+
+    public void awardTrophy(String id) throws ExecutionException, InterruptedException{
+
+        PostModel postModel = getPost(id);
+        postModel.setHasTrophy(true);
+        updatePost(id, postModel);
+
+        ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId()));
+        threadModel.setHasTrophy(true);
+        threadService.updateThread(postModel.getThreadId(), threadModel);
+
+        UserModel userModel = userService.getUserDetails(postModel.getUserEmail());
+        userModel.setTrophies(userModel.getTrophies() + 1);
+        userService.updateUserDetails(postModel.getUserEmail(), userModel);
     }
 }
