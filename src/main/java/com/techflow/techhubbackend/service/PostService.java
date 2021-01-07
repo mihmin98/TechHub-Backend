@@ -131,38 +131,64 @@ public class PostService {
     }
 
     public void upvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
-        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
-        if (!documentReference.exists())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
-
-        PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
+        PostModel postModel =  getPost(id);
         Set<String> upvotes = postModel.getUpvotes();
         upvotes.add(upvoteBy);
         postModel.setUpvotes(upvotes);
 
-        UserModel userModel = userService.getUserDetails(postModel.getUserEmail());
-        userModel.setCurrentPoints(userModel.getCurrentPoints() + 1);
-        userModel.setTotalPoints(userModel.getTotalPoints() + 1);
+        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+        UserModel userModel = new UserModel();
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
     }
 
     public void downvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
-        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
-        if (!documentReference.exists())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
-
-        PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
+        PostModel postModel =  getPost(id);
         Set<String> downvotes = postModel.getDownvotes();
         downvotes.add(upvoteBy);
         postModel.setDownvotes(downvotes);
 
-        UserModel userModel = userService.getUserDetails(postModel.getUserEmail());
-        userModel.setCurrentPoints(userModel.getCurrentPoints() - 1);
-        userModel.setTotalPoints(userModel.getTotalPoints() - 1);
+        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+        UserModel userModel = new UserModel();
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
+        userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+    }
+
+    public void removeUpvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
+
+        PostModel postModel =  getPost(id);
+        Set<String> upvotes = postModel.getUpvotes();
+        upvotes.remove(upvoteBy);
+        postModel.setUpvotes(upvotes);
+
+        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+        UserModel userModel = new UserModel();
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
+        userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+    }
+
+    public void removeDownvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
+
+        PostModel postModel =  getPost(id);
+        Set<String> downvotes = postModel.getDownvotes();
+        downvotes.remove(upvoteBy);
+        postModel.setDownvotes(downvotes);
+
+        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+        UserModel userModel = new UserModel();
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
