@@ -170,8 +170,8 @@ public class PostService {
 
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         UserModel userModel = new UserModel();
-        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
-        userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
@@ -186,8 +186,8 @@ public class PostService {
 
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         UserModel userModel = new UserModel();
-        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
-        userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
