@@ -50,4 +50,9 @@ public class PostController {
     public void downvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
         postService.downvotePost(id, email);
     }
+
+    @PutMapping("{id}/awardTrophy")
+    public void awardTrophy(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
+        postService.awardTrophy(id);
+    }
 }
