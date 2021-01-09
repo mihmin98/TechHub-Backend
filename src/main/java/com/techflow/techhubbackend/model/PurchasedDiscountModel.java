@@ -81,7 +81,7 @@ public class PurchasedDiscountModel {
         this.datePurchased = datePurchased;
     }
 
-    public PurchasedDiscountModel builderSetDateCreated(Timestamp datePurchased) {
+    public PurchasedDiscountModel builderSetDatePurchased(Timestamp datePurchased) {
         this.datePurchased = datePurchased.toDate();
         return this;
     }
