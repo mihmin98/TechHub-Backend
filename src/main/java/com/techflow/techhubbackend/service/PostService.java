@@ -139,6 +139,7 @@ public class PostService {
 
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         UserModel userModel = new UserModel();
+        userModel.setType(initialUserModel.getType());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
@@ -155,6 +156,7 @@ public class PostService {
 
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         UserModel userModel = new UserModel();
+        userModel.setType(initialUserModel.getType());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
@@ -171,6 +173,7 @@ public class PostService {
 
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         UserModel userModel = new UserModel();
+        userModel.setType(initialUserModel.getType());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
@@ -187,6 +190,7 @@ public class PostService {
 
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         UserModel userModel = new UserModel();
+        userModel.setType(initialUserModel.getType());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
