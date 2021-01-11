@@ -41,6 +41,11 @@ public class PostController {
         postService.deletePost(id);
     }
 
+    @GetMapping("postsByThreadId/{threadId}")
+    public List<PostModel> getPostsByThreadId(@PathVariable("threadId") String threadId) throws ExecutionException, InterruptedException {
+        return postService.getPostsByThreadId(threadId);
+    }
+
     @PutMapping("{id}/upvote/{email}")
     public void upvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
         postService.upvotePost(id, email);

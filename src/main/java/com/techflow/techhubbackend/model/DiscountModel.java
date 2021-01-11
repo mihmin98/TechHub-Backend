@@ -38,7 +38,7 @@ public class DiscountModel {
         this.title = (String) map.getOrDefault("title", "no title");
         this.description = (String) map.getOrDefault("description", "no seller description");
         this.pictures = (ArrayList<String>) map.getOrDefault("pictures", new ArrayList<String>());
-        this.pointsCost = (Integer) map.getOrDefault("pointsCost", 0);
+        this.pointsCost = ((Long) map.getOrDefault("pointsCost", 0)).intValue();
     }
 
     public String getId() {
@@ -126,7 +126,7 @@ public class DiscountModel {
         map.put("sellerEmail", sellerEmail);
         map.put("title", title);
         map.put("description", description);
-        if(pictures != null){
+        if (pictures != null) {
             map.put("pictures", Arrays.asList(pictures.toArray()));
         }
         map.put("pointsCost", pointsCost);
@@ -145,7 +145,7 @@ public class DiscountModel {
             map.put("title", title);
         if (description != null || includeEmptyFields)
             map.put("description", description);
-        if(pictures != null || includeEmptyFields){
+        if (pictures != null || includeEmptyFields) {
             map.put("pictures", Arrays.asList(pictures.toArray()));
         }
         map.put("pointsCost", pointsCost);

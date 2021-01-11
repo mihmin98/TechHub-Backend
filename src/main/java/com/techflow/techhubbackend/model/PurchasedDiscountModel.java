@@ -12,17 +12,17 @@ public class PurchasedDiscountModel {
     private String id;
     private String purchaserEmail;
     private int pointsSpent;
-    private String discoutId;
+    private String discountId;
     private Date datePurchased;
 
     public PurchasedDiscountModel() {
     }
 
-    public PurchasedDiscountModel(String id, String purchaserEmail, int pointsSpent, String discoutId, Date datePurchased) {
+    public PurchasedDiscountModel(String id, String purchaserEmail, int pointsSpent, String discountId, Date datePurchased) {
         this.id = id;
         this.purchaserEmail = purchaserEmail;
         this.pointsSpent = pointsSpent;
-        this.discoutId = discoutId;
+        this.discountId = discountId;
         this.datePurchased = datePurchased;
     }
 
@@ -30,15 +30,15 @@ public class PurchasedDiscountModel {
         this.id = purchasedDiscountModel.id;
         this.purchaserEmail = purchasedDiscountModel.purchaserEmail;
         this.pointsSpent = purchasedDiscountModel.pointsSpent;
-        this.discoutId = purchasedDiscountModel.discoutId;
+        this.discountId = purchasedDiscountModel.discountId;
         this.datePurchased = purchasedDiscountModel.datePurchased;
     }
 
     public PurchasedDiscountModel(Map<String, Object> map) {
         this.id = (String) map.getOrDefault("id", "no id");
         this.purchaserEmail = (String) map.getOrDefault("purchaserEmail", "no purchaser email");
-        this.pointsSpent = (Integer) map.getOrDefault("pointsSpent", 0);
-        this.discoutId = (String) map.getOrDefault("discountId", "no discount id");
+        this.pointsSpent = ((Long) map.getOrDefault("pointsSpent", 0)).intValue();
+        this.discountId = (String) map.getOrDefault("discountId", "no discount id");
     }
 
     public String getId() {
@@ -53,8 +53,8 @@ public class PurchasedDiscountModel {
         return pointsSpent;
     }
 
-    public String getDiscoutId() {
-        return discoutId;
+    public String getDiscountId() {
+        return discountId;
     }
 
     public Date getDatePurchased() {
@@ -73,8 +73,8 @@ public class PurchasedDiscountModel {
         this.pointsSpent = pointsSpent;
     }
 
-    public void setDiscoutId(String discoutId) {
-        this.discoutId = discoutId;
+    public void setDiscountId(String discountId) {
+        this.discountId = discountId;
     }
 
     public void setDatePurchased(Date datePurchased) {
@@ -92,7 +92,7 @@ public class PurchasedDiscountModel {
                 "id='" + id + '\'' +
                 ", purchaserEmail='" + purchaserEmail + '\'' +
                 ", pointsSpent=" + pointsSpent +
-                ", discoutId='" + discoutId + '\'' +
+                ", discountId='" + discountId + '\'' +
                 ", datePurchased=" + datePurchased +
                 '}';
     }
@@ -105,13 +105,13 @@ public class PurchasedDiscountModel {
         return pointsSpent == that.pointsSpent &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(purchaserEmail, that.purchaserEmail) &&
-                Objects.equals(discoutId, that.discoutId) &&
+                Objects.equals(discountId, that.discountId) &&
                 Objects.equals(datePurchased, that.datePurchased);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, purchaserEmail, pointsSpent, discoutId, datePurchased);
+        return Objects.hash(id, purchaserEmail, pointsSpent, discountId, datePurchased);
     }
 
     public Map<String, Object> generateMap() {
@@ -120,7 +120,7 @@ public class PurchasedDiscountModel {
         map.put("id", id);
         map.put("purchaserEmail", purchaserEmail);
         map.put("pointsSpent", pointsSpent);
-        map.put("discountId", discoutId);
+        map.put("discountId", discountId);
 
         return map;
     }
@@ -133,8 +133,8 @@ public class PurchasedDiscountModel {
         if (purchaserEmail != null || includeEmptyFields)
             map.put("purchaserEmail", purchaserEmail);
         map.put("pointsSpent", pointsSpent);
-        if (discoutId != null || includeEmptyFields)
-            map.put("discountId", discoutId);
+        if (discountId != null || includeEmptyFields)
+            map.put("discountId", discountId);
 
         return map;
     }

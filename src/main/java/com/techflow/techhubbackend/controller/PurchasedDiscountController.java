@@ -41,4 +41,9 @@ public class PurchasedDiscountController {
         purchasedDiscountService.deletePurchasedDiscount(id);
     }
 
+    @GetMapping("purchasedDiscountsByPurchaser/{purchaserEmail}")
+    public List<PurchasedDiscountModel> getPurchasedDiscountsByPurchaser(@PathVariable("purchaserEmail") String purchaserEmail) throws ExecutionException, InterruptedException {
+        return purchasedDiscountService.getPurchasedDiscountsByPurchaser(purchaserEmail);
+    }
+
 }
