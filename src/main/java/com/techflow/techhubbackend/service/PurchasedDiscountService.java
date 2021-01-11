@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,5 +79,15 @@ public class PurchasedDiscountService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Purchased discount not found");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).delete().get();
+    }
+
+    public List<PurchasedDiscountModel> getPurchasedDiscountsByPurchaser(String purchaserEmail) throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("purchaserEmail", purchaserEmail).get().get().getDocuments();
+
+        return documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
+                .map(mapTimestampEntry -> new PurchasedDiscountModel(mapTimestampEntry.getKey()).builderSetDatePurchased(mapTimestampEntry.getValue()))
+                .sorted(Comparator.comparing(PurchasedDiscountModel::getDatePurchased))
+                .collect(Collectors.toList());
     }
 }
