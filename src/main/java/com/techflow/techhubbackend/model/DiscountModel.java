@@ -127,7 +127,7 @@ public class DiscountModel {
         map.put("title", title);
         map.put("description", description);
         if(pictures != null){
-            map.put("pictures", Arrays.asList(pictures));
+            map.put("pictures", Arrays.asList(pictures.toArray()));
         }
         map.put("pointsCost", pointsCost);
 
@@ -146,7 +146,7 @@ public class DiscountModel {
         if (description != null || includeEmptyFields)
             map.put("description", description);
         if(pictures != null || includeEmptyFields){
-            map.put("pictures", Arrays.asList(pictures));
+            map.put("pictures", Arrays.asList(pictures.toArray()));
         }
         map.put("pointsCost", pointsCost);
 
