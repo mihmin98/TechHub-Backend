@@ -23,12 +23,22 @@ public class ThreadController {
 
     @GetMapping("/title/{title}")
     public List<ThreadModel> getThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException {
-        return threadService.getThreadsByTitle(title);
+        return threadService.getThreadsByTitle(title, false);
+    }
+
+    @GetMapping("/vip/title/{title}")
+    public List<ThreadModel> getVIPThreadsByTitle(@PathVariable("title") String title) throws ExecutionException, InterruptedException {
+        return threadService.getThreadsByTitle(title, true);
     }
 
     @GetMapping("")
     public List<ThreadModel> getAllThreads() throws ExecutionException, InterruptedException {
-        return threadService.getAllThreads();
+        return threadService.getAllThreads(false);
+    }
+
+    @GetMapping("/vip")
+    public List<ThreadModel> getAllVIPThreads() throws ExecutionException, InterruptedException {
+        return threadService.getAllThreads(true);
     }
 
     @GetMapping("{id}")
@@ -58,7 +68,12 @@ public class ThreadController {
 
     @GetMapping("/categories/{category}")
     public List<ThreadModel> getThreadsByCategory(@PathVariable("category") String category) throws ExecutionException, InterruptedException {
-        return threadService.getThreadsByCategory(category);
+        return threadService.getThreadsByCategory(category, false);
+    }
+
+    @GetMapping("/vip/categories/{category}")
+    public List<ThreadModel> getVIPThreadsByCategory(@PathVariable("category") String category) throws ExecutionException, InterruptedException {
+        return threadService.getThreadsByCategory(category, true);
     }
 
     @GetMapping("{id}/posts")

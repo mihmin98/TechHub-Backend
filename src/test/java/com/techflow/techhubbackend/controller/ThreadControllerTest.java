@@ -76,7 +76,7 @@ public class ThreadControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testThreadModel = new ThreadModel(null, threadControllerTestDataProperties.getThreadOwnerEmail(), threadControllerTestDataProperties.getThreadTitle(), threadControllerTestDataProperties.getThreadCategory(), threadControllerTestDataProperties.getThreadText(), null, threadControllerTestDataProperties.getHasTrophy());
+        testThreadModel = new ThreadModel(null, threadControllerTestDataProperties.getThreadOwnerEmail(), threadControllerTestDataProperties.getThreadTitle(), threadControllerTestDataProperties.getThreadCategory(), threadControllerTestDataProperties.getThreadText(), null, threadControllerTestDataProperties.getHasTrophy(), threadControllerTestDataProperties.getVipStatus());
         UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
@@ -169,6 +169,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getCategory(), getResult.getCategory());
         assertEquals(thread.getText(), getResult.getText());
         assertEquals(thread.getHasTrophy(), getResult.getHasTrophy());
+        assertEquals(thread.getVipStatus(), getResult.getVipStatus());
         assertNotNull(getResult.getDateCreated());
     }
 
@@ -198,6 +199,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getCategory(), createdThread.getCategory());
         assertEquals(thread.getText(), createdThread.getText());
         assertEquals(thread.getHasTrophy(), createdThread.getHasTrophy());
+        assertEquals(thread.getVipStatus(), createdThread.getVipStatus());
     }
 
     @Test
@@ -237,6 +239,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getTitle(), dbThread.getTitle());
         assertEquals(thread.getCategory(), dbThread.getCategory());
         assertEquals(thread.getHasTrophy(), dbThread.getHasTrophy());
+        assertEquals(thread.getVipStatus(), dbThread.getVipStatus());
         assertEquals(threadControllerTestDataProperties.getThreadPutText(), dbThread.getText());
     }
 
@@ -490,6 +493,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getCategory(), receivedThread.getCategory());
         assertEquals(thread.getText(), receivedThread.getText());
         assertEquals(thread.getHasTrophy(), receivedThread.getHasTrophy());
+        assertEquals(thread.getVipStatus(), receivedThread.getVipStatus());
     }
 
     @AfterAll
