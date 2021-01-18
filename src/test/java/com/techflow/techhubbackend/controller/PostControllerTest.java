@@ -326,7 +326,7 @@ public class PostControllerTest {
         threadsToDelete.add(thread.getId());
 
         // Get posts for newly created thread
-        String postsJson = mockMvc.perform(get("/post/" + thread.getId())
+        String postsJson = mockMvc.perform(get("/post/postsByThreadId/" + thread.getId())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -355,7 +355,7 @@ public class PostControllerTest {
         }
 
         // Get posts from thread
-        postsJson = mockMvc.perform(get("/post/" + thread.getId())
+        postsJson = mockMvc.perform(get("/post/postsByThreadId/" + thread.getId())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -378,9 +378,8 @@ public class PostControllerTest {
 
         // Create a new post
         PostModel post = new PostModel(testPostModel);
-
-        // Make sure the user has not upvoted the post
-        assertFalse(post.getUpvotes().contains(userTestDataProperties.getUserEmail()));
+        post.setUserEmail(userTestDataProperties.getUserEmail());
+        post.getUpvotes().remove(userTestDataProperties.getUserEmail());
 
         post.setId(documentReference.getId());
         documentReference.set(post.generateMap()).get();
@@ -433,9 +432,7 @@ public class PostControllerTest {
         // Create a new post
         PostModel post = new PostModel(testPostModel);
         post.setUserEmail(userTestDataProperties.getUserEmail());
-
-        // Make sure the user has not downvoted the post
-        assertFalse(post.getDownvotes().contains(userTestDataProperties.getUserEmail()));
+        post.getDownvotes().remove(userTestDataProperties.getUserEmail());
 
         post.setId(documentReference.getId());
         documentReference.set(post.generateMap()).get();
