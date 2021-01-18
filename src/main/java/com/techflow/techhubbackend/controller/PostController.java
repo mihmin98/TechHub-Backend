@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_HEADER_STRING;
+
 @RestController
 @RequestMapping("/post")
 public class PostController {
@@ -46,24 +48,24 @@ public class PostController {
         return postService.getPostsByThreadId(threadId);
     }
 
-    @PutMapping("{id}/upvote/{email}")
-    public void upvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
-        postService.upvotePost(id, email);
+    @PutMapping("{id}/upvote")
+    public void upvotePost(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        postService.upvotePost(id, jwt);
     }
 
-    @PutMapping("{id}/downvote/{email}")
-    public void downvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
-        postService.downvotePost(id, email);
+    @PutMapping("{id}/downvote")
+    public void downvotePost(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        postService.downvotePost(id, jwt);
     }
 
-    @PutMapping("{id}/removeUpvote/{email}")
-    public void removeUpvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
-        postService.removeUpvotePost(id, email);
+    @PutMapping("{id}/removeUpvote")
+    public void removeUpvotePost(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        postService.removeUpvotePost(id, jwt);
     }
 
-    @PutMapping("{id}/removeDownvote/{email}")
-    public void removeDownvotePost(@PathVariable("id") String id, @PathVariable("email") String email) throws ExecutionException, InterruptedException {
-        postService.removeDownvotePost(id, email);
+    @PutMapping("{id}/removeDownvote")
+    public void removeDownvotePost(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        postService.removeDownvotePost(id, jwt);
     }
 
     @PutMapping("{id}/awardTrophy")
