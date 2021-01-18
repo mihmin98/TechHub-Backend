@@ -29,6 +29,15 @@ public class UserControllerTestDataProperties {
     @Value("${user.accountStatus}")
     private String userAccountStatus;
 
+    @Value("${user.currentPoints}")
+    private Integer userCurrentPoints;
+
+    @Value("${user.totalPoints}")
+    private Integer userTotalPoints;
+
+    @Value("${user.trophies}")
+    private Integer userTrophies;
+
     @Value("${user.invalid.email}")
     private String userInvalidEmail;
 
@@ -109,6 +118,30 @@ public class UserControllerTestDataProperties {
 
     public void setUserAccountStatus(String userAccountStatus) {
         this.userAccountStatus = userAccountStatus;
+    }
+
+    public Integer getUserCurrentPoints() {
+        return userCurrentPoints;
+    }
+
+    public void setUserCurrentPoints(Integer userCurrentPoints) {
+        this.userCurrentPoints = userCurrentPoints;
+    }
+
+    public Integer getUserTotalPoints() {
+        return userTotalPoints;
+    }
+
+    public void setUserTotalPoints(Integer userTotalPoints) {
+        this.userTotalPoints = userTotalPoints;
+    }
+
+    public Integer getUserTrophies() {
+        return userTrophies;
+    }
+
+    public void setUserTrophies(Integer userTrophies) {
+        this.userTrophies = userTrophies;
     }
 
     public String getUserInvalidEmail() {
