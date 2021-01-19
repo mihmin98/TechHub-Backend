@@ -39,8 +39,8 @@ public class PostModel {
         this.text = postModel.getText();
         this.dateCreated = postModel.getDateCreated();
         this.hasTrophy = postModel.isHasTrophy();
-        this.upvotes = postModel.getUpvotes();
-        this.downvotes = postModel.getDownvotes();
+        this.upvotes =  new HashSet<>(postModel.getUpvotes());
+        this.downvotes = new HashSet<>(postModel.getDownvotes());
     }
 
     public PostModel(Map<String, Object> map) {
