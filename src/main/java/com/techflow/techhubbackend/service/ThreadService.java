@@ -32,10 +32,10 @@ public class ThreadService {
     @Autowired
     private ThreadCategoriesProperties threadCategoriesProperties;
 
-    public List<ThreadModel> getThreadsByTitle(String title) throws ExecutionException, InterruptedException {
+    public List<ThreadModel> getThreadsByTitle(String title, Boolean vipStatus) throws ExecutionException, InterruptedException {
 
         title = title.toLowerCase();
-        List<ThreadModel> convertedList = dbFirestore.collection(COLLECTION_NAME).get().get().getDocuments().stream()
+        List<ThreadModel> convertedList = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("vipStatus", vipStatus).get().get().getDocuments().stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
                 .map(mapTimestampEntry -> new ThreadModel(mapTimestampEntry.getKey()).builderSetDateCreated(mapTimestampEntry.getValue()))
                 .collect(Collectors.toList());
@@ -55,8 +55,8 @@ public class ThreadService {
         return returnList;
     }
 
-    public List<ThreadModel> getAllThreads() throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).get().get().getDocuments();
+    public List<ThreadModel> getAllThreads(Boolean vipStatus) throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("vipStatus", vipStatus).get().get().getDocuments();
 
         return documentSnapshots.stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
@@ -125,8 +125,8 @@ public class ThreadService {
         return threadCategoriesProperties.getCategories();
     }
 
-    public List<ThreadModel> getThreadsByCategory(String category) throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("category", category).get().get().getDocuments();
+    public List<ThreadModel> getThreadsByCategory(String category, Boolean vipStatus) throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("vipStatus", vipStatus).whereEqualTo("category", category).get().get().getDocuments();
 
         return documentSnapshots.stream()
                 .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))

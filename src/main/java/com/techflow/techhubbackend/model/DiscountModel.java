@@ -10,17 +10,19 @@ public class DiscountModel {
     private String description;
     private ArrayList<String> pictures;
     private int pointsCost;
+    private Boolean vipStatus;
 
     public DiscountModel() {
     }
 
-    public DiscountModel(String id, String sellerEmail, String title, String description, ArrayList<String> pictures, int pointsCost) {
+    public DiscountModel(String id, String sellerEmail, String title, String description, ArrayList<String> pictures, int pointsCost, Boolean vipStatus) {
         this.id = id;
         this.sellerEmail = sellerEmail;
         this.title = title;
         this.description = description;
         this.pictures = pictures;
         this.pointsCost = pointsCost;
+        this.vipStatus = vipStatus;
     }
 
     public DiscountModel(DiscountModel discountModel) {
@@ -30,6 +32,7 @@ public class DiscountModel {
         this.description = discountModel.description;
         this.pictures = discountModel.pictures;
         this.pointsCost = discountModel.pointsCost;
+        this.vipStatus = discountModel.vipStatus;
     }
 
     public DiscountModel(Map<String, Object> map) {
@@ -39,6 +42,7 @@ public class DiscountModel {
         this.description = (String) map.getOrDefault("description", "no seller description");
         this.pictures = (ArrayList<String>) map.getOrDefault("pictures", new ArrayList<String>());
         this.pointsCost = ((Long) map.getOrDefault("pointsCost", 0)).intValue();
+        this.vipStatus = (Boolean) map.getOrDefault("vipStatus", 0);
     }
 
     public String getId() {
@@ -89,6 +93,14 @@ public class DiscountModel {
         this.pointsCost = pointsCost;
     }
 
+    public Boolean getVipStatus() {
+        return vipStatus;
+    }
+
+    public void setVipStatus(Boolean vipStatus) {
+        this.vipStatus = vipStatus;
+    }
+
     @Override
     public String toString() {
         return "DiscountModel{" +
@@ -98,6 +110,7 @@ public class DiscountModel {
                 ", description='" + description + '\'' +
                 ", pictures=" + pictures +
                 ", pointsCost=" + pointsCost +
+                ", vipStatus=" + vipStatus +
                 '}';
     }
 
@@ -111,12 +124,13 @@ public class DiscountModel {
                 Objects.equals(sellerEmail, that.sellerEmail) &&
                 Objects.equals(title, that.title) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(pictures, that.pictures);
+                Objects.equals(pictures, that.pictures) &&
+                Objects.equals(vipStatus, that.vipStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sellerEmail, title, description, pictures, pointsCost);
+        return Objects.hash(id, sellerEmail, title, description, pictures, pointsCost, vipStatus);
     }
 
     public Map<String, Object> generateMap() {
@@ -130,6 +144,7 @@ public class DiscountModel {
             map.put("pictures", Arrays.asList(pictures.toArray()));
         }
         map.put("pointsCost", pointsCost);
+        map.put("vipStatus", vipStatus);
 
         return map;
     }
@@ -149,6 +164,9 @@ public class DiscountModel {
             map.put("pictures", Arrays.asList(pictures.toArray()));
         }
         map.put("pointsCost", pointsCost);
+        if (vipStatus != null || includeEmptyFields) {
+            map.put("vipStatus", vipStatus);
+        }
 
         return map;
     }

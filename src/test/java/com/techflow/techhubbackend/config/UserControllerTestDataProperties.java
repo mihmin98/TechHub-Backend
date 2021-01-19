@@ -56,6 +56,15 @@ public class UserControllerTestDataProperties {
     @Value("#{${user.sort.trophies}}")
     private List<Integer> userSortTrophies;
 
+    @Value("${user.vip.email}")
+    private String userVipEmail;
+
+    @Value("${user.vip.type}")
+    private UserType userVipType;
+
+    @Value("${user.vip.vipStatus}")
+    private Boolean userVipVipStatus;
+
     public UserControllerTestDataProperties() {
     }
 
@@ -181,5 +190,29 @@ public class UserControllerTestDataProperties {
 
     public void setUserSortTrophies(List<Integer> userSortTrophies) {
         this.userSortTrophies = userSortTrophies;
+    }
+
+    public String getUserVipEmail() {
+        return userVipEmail;
+    }
+
+    public void setUserVipEmail(String userVipEmail) {
+        this.userVipEmail = userVipEmail;
+    }
+
+    public UserType getUserVipType() {
+        return userVipType;
+    }
+
+    public void setUserVipType(UserType userVipType) {
+        this.userVipType = userVipType;
+    }
+
+    public Boolean getUserVipVipStatus() {
+        return userVipVipStatus;
+    }
+
+    public void setUserVipVipStatus(Boolean userVipVipStatus) {
+        this.userVipVipStatus = userVipVipStatus;
     }
 }

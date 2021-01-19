@@ -23,6 +23,9 @@ public class ThreadControllerTestDataProperties {
     @Value("${thread.hasTrophy}")
     private Boolean hasTrophy;
 
+    @Value("${thread.vipStatus}")
+    private Boolean vipStatus;
+
     @Value("${thread.put.text}")
     private String threadPutText;
 
@@ -73,4 +76,7 @@ public class ThreadControllerTestDataProperties {
         this.threadPutText = threadPutText;
     }
 
+    public Boolean getVipStatus() { return vipStatus; }
+
+    public void setVipStatus(Boolean vipStatus) { this.vipStatus = vipStatus; }
 }
