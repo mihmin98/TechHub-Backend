@@ -99,8 +99,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String userEmail = ((User) authResult.getPrincipal()).getUsername();
         String userType = null;
+        Boolean userVipStatus = null;
         try {
             userType = dbFirestore.collection("user").document(userEmail).get().get().getString("type");
+            userVipStatus = dbFirestore.collection("user").document(userEmail).get().get().getBoolean("vipStatus");
+            if (userVipStatus == null)
+                userVipStatus = false;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -108,6 +112,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String token = JWT.create()
                 .withSubject(((User) authResult.getPrincipal()).getUsername())
                 .withClaim("userType", userType)
+                .withClaim("userVipStatus", userVipStatus)
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(HMAC512(SECRET.getBytes()));
         ObjectMapper mapper = new ObjectMapper();
