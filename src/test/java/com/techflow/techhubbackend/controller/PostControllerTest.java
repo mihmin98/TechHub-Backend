@@ -379,7 +379,6 @@ public class PostControllerTest {
         // Create a new post
         PostModel post = new PostModel(testPostModel);
         post.setUserEmail(userTestDataProperties.getUserEmail());
-        post.getUpvotes().remove(userTestDataProperties.getUserEmail());
 
         post.setId(documentReference.getId());
         documentReference.set(post.generateMap()).get();
@@ -400,8 +399,8 @@ public class PostControllerTest {
         assertTrue(updatedPost.getUpvotes().contains(userTestDataProperties.getUserEmail()));
 
         // Check if the number of points has changed for the current user
-        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        Long updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        Long updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
@@ -411,14 +410,41 @@ public class PostControllerTest {
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk());
 
-        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
 
-        // TODO: remove upvote and add downvote directly in db
-        // TODO: upvote and check if the downvote was removed and the upvote added
+        // Remove upvote and add downvote directly in db
+        updatedPost.getUpvotes().remove(userTestDataProperties.getUserEmail());
+        updatedPost.getDownvotes().add(userTestDataProperties.getUserEmail());
+
+        HashMap<String, Object> updatedVotes = new HashMap<>();
+        updatedVotes.put("upvotes", Arrays.asList(updatedPost.getUpvotes().toArray()));
+        updatedVotes.put("downvotes", Arrays.asList(updatedPost.getDownvotes().toArray()));
+
+        documentReference.update(updatedVotes).get();
+
+        // Get the current user again
+        currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Upvote
+        mockMvc.perform(put("/post/" + post.getId() + "/upvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the upvote was added and the downvote removed
+        updatedPost = new PostModel(Objects.requireNonNull(documentReference.get().get().getData()));
+        assertTrue(updatedPost.getUpvotes().contains(userTestDataProperties.getUserEmail()));
+        assertFalse(updatedPost.getDownvotes().contains(userTestDataProperties.getUserEmail()));
+
+        // Check if the points have been updated
+        updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() + 2, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() + 2, updatedTotalPoints.intValue());
     }
 
     @Test
@@ -432,7 +458,6 @@ public class PostControllerTest {
         // Create a new post
         PostModel post = new PostModel(testPostModel);
         post.setUserEmail(userTestDataProperties.getUserEmail());
-        post.getDownvotes().remove(userTestDataProperties.getUserEmail());
 
         post.setId(documentReference.getId());
         documentReference.set(post.generateMap()).get();
@@ -453,8 +478,8 @@ public class PostControllerTest {
         assertTrue(updatedPost.getDownvotes().contains(userTestDataProperties.getUserEmail()));
 
         // Check if the number of points has changed for the current user
-        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        Long updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        Long updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
@@ -464,14 +489,41 @@ public class PostControllerTest {
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isOk());
 
-        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
 
-        // TODO: remove downvote and add upvote directly in db
-        // TODO: downvote and check if the upvote was removed and the upvote added
+        // Remove downvote and add upvote directly in db
+        updatedPost.getDownvotes().remove(userTestDataProperties.getUserEmail());
+        updatedPost.getUpvotes().add(userTestDataProperties.getUserEmail());
+
+        HashMap<String, Object> updatedVotes = new HashMap<>();
+        updatedVotes.put("upvotes", Arrays.asList(updatedPost.getUpvotes().toArray()));
+        updatedVotes.put("downvotes", Arrays.asList(updatedPost.getDownvotes().toArray()));
+
+        documentReference.update(updatedVotes).get();
+
+        // Get the current user again
+        currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Downvote
+        mockMvc.perform(put("/post/" + post.getId() + "/downvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the downvote was added and the upvote removed
+        updatedPost = new PostModel(Objects.requireNonNull(documentReference.get().get().getData()));
+        assertTrue(updatedPost.getDownvotes().contains(userTestDataProperties.getUserEmail()));
+        assertFalse(updatedPost.getUpvotes().contains(userTestDataProperties.getUserEmail()));
+
+        // Check if the points have been updated
+        updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() - 2, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() - 2, updatedTotalPoints.intValue());
     }
 
     @Test
@@ -506,8 +558,8 @@ public class PostControllerTest {
         assertFalse(Objects.requireNonNull(upvotesList).contains(userTestDataProperties.getUserEmail()));
 
         // Check if the user's points have been updated
-        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        Long updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        Long updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
@@ -518,8 +570,8 @@ public class PostControllerTest {
                 .andExpect(status().isOk());
 
         // Check if the number of points has changed
-        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
@@ -557,8 +609,8 @@ public class PostControllerTest {
         assertFalse(Objects.requireNonNull(downvotesList).contains(userTestDataProperties.getUserEmail()));
 
         // Check if the user's points have been updated
-        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        Long updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
@@ -569,8 +621,8 @@ public class PostControllerTest {
                 .andExpect(status().isOk());
 
         // Check if the number of points has changed
-        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
-        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+        updatedCurrentPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("currentPoints"));
+        updatedTotalPoints = Objects.requireNonNull(currentUserDocumentReference.get().get().getLong("totalPoints"));
 
         assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());

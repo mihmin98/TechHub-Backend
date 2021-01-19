@@ -137,14 +137,22 @@ public class PostService {
     public void upvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
         PostModel postModel = getPost(id);
         Set<String> upvotes = postModel.getUpvotes();
+        String userEmail = getEmailFromJWT(jwt);
 
-        if (!upvotes.contains(getEmailFromJWT(jwt))) {
-            upvotes.add(getEmailFromJWT(jwt));
-            postModel.setUpvotes(upvotes);
-
+        if (!upvotes.contains(userEmail)) {
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
             UserModel userModel = new UserModel();
             userModel.setType(initialUserModel.getType());
+
+            if (postModel.getDownvotes().contains(userEmail)) {
+                postModel.getDownvotes().remove(userEmail);
+                initialUserModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
+                initialUserModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
+            }
+
+            upvotes.add(userEmail);
+            postModel.setUpvotes(upvotes);
+
             userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
             userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
@@ -156,14 +164,22 @@ public class PostService {
     public void downvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
         PostModel postModel = getPost(id);
         Set<String> downvotes = postModel.getDownvotes();
+        String userEmail = getEmailFromJWT(jwt);
 
-        if (!downvotes.contains(getEmailFromJWT(jwt))) {
-            downvotes.add(getEmailFromJWT(jwt));
-            postModel.setDownvotes(downvotes);
-
+        if (!downvotes.contains(userEmail)) {
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
             UserModel userModel = new UserModel();
             userModel.setType(initialUserModel.getType());
+
+            if (postModel.getUpvotes().contains(userEmail)) {
+                postModel.getUpvotes().remove(userEmail);
+                initialUserModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+                initialUserModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
+            }
+
+            downvotes.add(userEmail);
+            postModel.setDownvotes(downvotes);
+
             userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
             userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
