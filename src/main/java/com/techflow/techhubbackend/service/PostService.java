@@ -1,5 +1,7 @@
 package com.techflow.techhubbackend.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -18,6 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_TOKEN_PREFIX;
 
 @Service
 public class PostService {
@@ -130,86 +134,103 @@ public class PostService {
                 .count();
     }
 
-    public void upvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
-
-        PostModel postModel =  getPost(id);
-        Set<String> upvotes = postModel.getUpvotes();
-        upvotes.add(upvoteBy);
-        postModel.setUpvotes(upvotes);
-
-        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
-        UserModel userModel = new UserModel();
-        userModel.setType(initialUserModel.getType());
-        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
-        userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
-        userService.updateUserDetails(postModel.getUserEmail(), userModel);
-
-        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
-    }
-
-    public void downvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
-
-        PostModel postModel =  getPost(id);
-        Set<String> downvotes = postModel.getDownvotes();
-        downvotes.add(upvoteBy);
-        postModel.setDownvotes(downvotes);
-
-        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
-        UserModel userModel = new UserModel();
-        userModel.setType(initialUserModel.getType());
-        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
-        userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
-        userService.updateUserDetails(postModel.getUserEmail(), userModel);
-
-        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
-    }
-
-    public void removeUpvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
-
-        PostModel postModel =  getPost(id);
-        Set<String> upvotes = postModel.getUpvotes();
-        upvotes.remove(upvoteBy);
-        postModel.setUpvotes(upvotes);
-
-        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
-        UserModel userModel = new UserModel();
-        userModel.setType(initialUserModel.getType());
-        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
-        userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
-        userService.updateUserDetails(postModel.getUserEmail(), userModel);
-
-        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
-    }
-
-    public void removeDownvotePost(String id, String upvoteBy) throws ExecutionException, InterruptedException {
-
-        PostModel postModel =  getPost(id);
-        Set<String> downvotes = postModel.getDownvotes();
-        downvotes.remove(upvoteBy);
-        postModel.setDownvotes(downvotes);
-
-        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
-        UserModel userModel = new UserModel();
-        userModel.setType(initialUserModel.getType());
-        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
-        userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
-        userService.updateUserDetails(postModel.getUserEmail(), userModel);
-
-        dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
-    }
-
-    public void awardTrophy(String id) throws ExecutionException, InterruptedException{
-
+    public void upvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
         PostModel postModel = getPost(id);
-        postModel.setHasTrophy(true);
-        updatePost(id, postModel);
+        Set<String> upvotes = postModel.getUpvotes();
 
+        if (!upvotes.contains(getEmailFromJWT(jwt))) {
+            upvotes.add(getEmailFromJWT(jwt));
+            postModel.setUpvotes(upvotes);
+
+            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+            UserModel userModel = new UserModel();
+            userModel.setType(initialUserModel.getType());
+            userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
+            userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
+            userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+            dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+        }
+    }
+
+    public void downvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
+        PostModel postModel = getPost(id);
+        Set<String> downvotes = postModel.getDownvotes();
+
+        if (!downvotes.contains(getEmailFromJWT(jwt))) {
+            downvotes.add(getEmailFromJWT(jwt));
+            postModel.setDownvotes(downvotes);
+
+            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+            UserModel userModel = new UserModel();
+            userModel.setType(initialUserModel.getType());
+            userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+            userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
+            userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+            dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+        }
+    }
+
+    public void removeUpvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
+        PostModel postModel = getPost(id);
+        Set<String> upvotes = postModel.getUpvotes();
+
+        if (upvotes.contains(getEmailFromJWT(jwt))) {
+            upvotes.remove(getEmailFromJWT(jwt));
+            postModel.setUpvotes(upvotes);
+
+            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+            UserModel userModel = new UserModel();
+            userModel.setType(initialUserModel.getType());
+            userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - 1);
+            userModel.setTotalPoints(initialUserModel.getTotalPoints() - 1);
+            userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+            dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+        }
+    }
+
+    public void removeDownvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
+        PostModel postModel = getPost(id);
+        Set<String> downvotes = postModel.getDownvotes();
+
+        if (downvotes.contains(getEmailFromJWT(jwt))) {
+            downvotes.remove(getEmailFromJWT(jwt));
+            postModel.setDownvotes(downvotes);
+
+            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+            UserModel userModel = new UserModel();
+            userModel.setType(initialUserModel.getType());
+            userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
+            userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
+            userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+            dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
+        }
+    }
+
+    public void awardTrophy(String id) throws ExecutionException, InterruptedException {
+        PostModel postModel = getPost(id);
         ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId()));
-        threadModel.setHasTrophy(true);
-        threadService.updateThread(postModel.getThreadId(), threadModel);
 
-        UserModel userModel = userService.getUserDetails(postModel.getUserEmail());
-        userModel.setTrophies(userModel.getTrophies() + 1);
-        userService.updateUserDetails(postModel.getUserEmail(), userModel);
+        if (!postModel.isHasTrophy() && !threadModel.getHasTrophy()) {
+            postModel.setHasTrophy(true);
+            updatePost(id, postModel);
+
+            threadModel.setHasTrophy(true);
+            threadService.updateThread(postModel.getThreadId(), threadModel);
+
+            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+            UserModel userModel = new UserModel();
+            userModel.setType(initialUserModel.getType());
+            userModel.setTrophies(initialUserModel.getTrophies() + 1);
+            userService.updateUserDetails(postModel.getUserEmail(), userModel);
+        }
+    }
+
+    private String getEmailFromJWT(String jwt) {
+        DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
+        return decodedJWT.getSubject();
     }
 }

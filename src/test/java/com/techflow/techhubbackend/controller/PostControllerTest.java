@@ -12,6 +12,7 @@ import com.techflow.techhubbackend.config.UserControllerTestDataProperties;
 import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
 import com.techflow.techhubbackend.model.UserModel;
+import com.techflow.techhubbackend.model.UserType;
 import com.techflow.techhubbackend.security.SecurityConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,10 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -72,6 +70,10 @@ public class PostControllerTest {
     void login() throws Exception {
         testPostModel = new PostModel(null, postControllerTestDataProperties.getPostUserEmail(), null, null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes());
         UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
+        user.setType(UserType.REGULAR_USER);
+        user.setCurrentPoints(userTestDataProperties.getUserCurrentPoints());
+        user.setTotalPoints(userTestDataProperties.getUserTotalPoints());
+        user.setTrophies(userTestDataProperties.getUserTrophies());
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         dbFirestore.collection(USER_COLLECTION_NAME).document(user.getEmail()).set(user.generateMap()).get();
@@ -252,8 +254,6 @@ public class PostControllerTest {
 
     @Test
     void deletePost() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-
         // Create a thread
         ThreadModel thread = new ThreadModel();
         DocumentReference threadDocumentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
@@ -265,7 +265,7 @@ public class PostControllerTest {
         PostModel post = new PostModel(testPostModel);
         DocumentReference postDocumentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
 
-        // Try to DELETE non exisiting post
+        // Try to DELETE non existing post
         mockMvc.perform(delete("/post/" + postDocumentReference.getId())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
@@ -311,6 +311,329 @@ public class PostControllerTest {
             PostModel p = new PostModel(Objects.requireNonNull(postsDocumentReference.get(i).get().get().getData()));
             assertEquals(i + 1, p.getPostNumber());
         }
+    }
+
+    @Test
+    void getPostsByThreadId() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Create a thread
+        ThreadModel thread = new ThreadModel();
+        DocumentReference threadDocumentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
+        thread.setId(threadDocumentReference.getId());
+
+        threadDocumentReference.set(thread.generateMap()).get();
+        threadsToDelete.add(thread.getId());
+
+        // Get posts for newly created thread
+        String postsJson = mockMvc.perform(get("/post/postsByThreadId/" + thread.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<PostModel> receivedPosts = mapper.readValue(postsJson, new TypeReference<>() {
+        });
+
+        assertEquals(0, receivedPosts.size());
+
+        // Create some posts for the thread
+        int numPosts = 3;
+
+        for (int i = 0; i < numPosts; ++i) {
+            PostModel post = new PostModel(testPostModel);
+            post.setText(post.getText() + i);
+            post.setThreadId(thread.getId());
+
+            DocumentReference postDocumentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
+            post.setId(postDocumentReference.getId());
+
+            postDocumentReference.set(post.generateMap()).get();
+
+            postsToDelete.add(post.getId());
+        }
+
+        // Get posts from thread
+        postsJson = mockMvc.perform(get("/post/postsByThreadId/" + thread.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        receivedPosts = mapper.readValue(postsJson, new TypeReference<>() {
+        });
+
+        assertEquals(numPosts, receivedPosts.size());
+    }
+
+    @Test
+    void upvotePost() throws Exception {
+        // Upvote non existing post
+        DocumentReference documentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/upvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isNotFound());
+
+        // Create a new post
+        PostModel post = new PostModel(testPostModel);
+        post.setUserEmail(userTestDataProperties.getUserEmail());
+        post.getUpvotes().remove(userTestDataProperties.getUserEmail());
+
+        post.setId(documentReference.getId());
+        documentReference.set(post.generateMap()).get();
+
+        postsToDelete.add(post.getId());
+
+        // Get current user
+        DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+        UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Upvote the post
+        mockMvc.perform(put("/post/" + post.getId() + "/upvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the current user has been added in the upvote list
+        PostModel updatedPost = new PostModel(Objects.requireNonNull(documentReference.get().get().getData()));
+        assertTrue(updatedPost.getUpvotes().contains(userTestDataProperties.getUserEmail()));
+
+        // Check if the number of points has changed for the current user
+        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
+
+        // Upvote again and check if the number of upvotes has changed
+        mockMvc.perform(put("/post/" + post.getId() + "/upvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
+
+        // TODO: remove upvote and add downvote directly in db
+        // TODO: upvote and check if the downvote was removed and the upvote added
+    }
+
+    @Test
+    void downvotePost() throws Exception {
+        // Downvote non existing post
+        DocumentReference documentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/downvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isNotFound());
+
+        // Create a new post
+        PostModel post = new PostModel(testPostModel);
+        post.setUserEmail(userTestDataProperties.getUserEmail());
+        post.getDownvotes().remove(userTestDataProperties.getUserEmail());
+
+        post.setId(documentReference.getId());
+        documentReference.set(post.generateMap()).get();
+
+        postsToDelete.add(post.getId());
+
+        // Get current user
+        DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+        UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Downvote the post
+        mockMvc.perform(put("/post/" + post.getId() + "/downvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the current user has been added in the downvote list
+        PostModel updatedPost = new PostModel(Objects.requireNonNull(documentReference.get().get().getData()));
+        assertTrue(updatedPost.getDownvotes().contains(userTestDataProperties.getUserEmail()));
+
+        // Check if the number of points has changed for the current user
+        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
+
+        // Downvote again and check if the number of downvotes has changed
+        mockMvc.perform(put("/post/" + post.getId() + "/downvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
+
+        // TODO: remove downvote and add upvote directly in db
+        // TODO: downvote and check if the upvote was removed and the upvote added
+    }
+
+    @Test
+    void removeUpvotePost() throws Exception {
+        // Remove upvote from non existing post
+        DocumentReference documentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/removeUpvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isNotFound());
+
+        // Create a new post and add current user to the upvotes list
+        PostModel post = new PostModel(testPostModel);
+        post.setUserEmail(userTestDataProperties.getUserEmail());
+        post.getUpvotes().add(userTestDataProperties.getUserEmail());
+
+        post.setId(documentReference.getId());
+        documentReference.set(post.generateMap()).get();
+
+        postsToDelete.add(post.getId());
+
+        // Get current user
+        DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+        UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Remove upvote
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/removeUpvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the current user has disappeared from the upvote list
+        List<String> upvotesList = (List<String>) documentReference.get().get().get("upvotes");
+        assertFalse(Objects.requireNonNull(upvotesList).contains(userTestDataProperties.getUserEmail()));
+
+        // Check if the user's points have been updated
+        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
+
+        // Try to remove the upvote again
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/removeUpvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the number of points has changed
+        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() - 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() - 1, updatedTotalPoints.intValue());
+    }
+
+    @Test
+    void removeDownvotePost() throws Exception {
+        // Remove downvote from non existing post
+        DocumentReference documentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/removeDownvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isNotFound());
+
+        // Create a new post and add current user to the upvotes list
+        PostModel post = new PostModel(testPostModel);
+        post.setUserEmail(userTestDataProperties.getUserEmail());
+        post.getDownvotes().add(userTestDataProperties.getUserEmail());
+
+        post.setId(documentReference.getId());
+        documentReference.set(post.generateMap()).get();
+
+        postsToDelete.add(post.getId());
+
+        // Get current user
+        DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+        UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Remove downvote
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/removeDownvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the current user has disappeared from the upvote list
+        List<String> downvotesList = (List<String>) documentReference.get().get().get("downvotes");
+        assertFalse(Objects.requireNonNull(downvotesList).contains(userTestDataProperties.getUserEmail()));
+
+        // Check if the user's points have been updated
+        Long updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        Long updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
+
+        // Try to remove the downvote again
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/removeDownvote")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the number of points has changed
+        updatedCurrentPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("currentPoints"));
+        updatedTotalPoints = (Long) Objects.requireNonNull(currentUserDocumentReference.get().get().get("totalPoints"));
+
+        assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
+        assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
+    }
+
+    @Test
+    void awardTrophy() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Try to award trophy to non existing post
+        DocumentReference documentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/awardTrophy")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isNotFound());
+
+        // Create a new thread
+        ThreadModel thread = new ThreadModel();
+        thread.setHasTrophy(false);
+
+        DocumentReference threadDocumentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
+        thread.setId(threadDocumentReference.getId());
+        threadDocumentReference.set(thread.generateMap()).get();
+
+        threadsToDelete.add(thread.getId());
+
+        // Create post for thread
+        PostModel post = new PostModel(testPostModel);
+        post.setUserEmail(userTestDataProperties.getUserEmail());
+        post.setThreadId(thread.getId());
+        post.setHasTrophy(false);
+
+        post.setId(documentReference.getId());
+        documentReference.set(post.generateMap()).get();
+
+        postsToDelete.add(post.getId());
+
+        // Get current user
+        DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+        UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
+
+        // Award thread
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/awardTrophy")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the post has received the award
+        assertEquals(true, documentReference.get().get().getBoolean("hasTrophy"));
+
+        // Check if the thread has updated the hasTrophy flag
+        assertEquals(true, threadDocumentReference.get().get().getBoolean("hasTrophy"));
+
+        // Check the user's trophies
+        Long updatedUserTrophies = currentUserDocumentReference.get().get().getLong("trophies");
+        assertEquals(currentUser.getTrophies() + 1, updatedUserTrophies);
+
+        // Try to award again
+        mockMvc.perform(put("/post/" + documentReference.getId() + "/awardTrophy")
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isOk());
+
+        // Check if the user's trophies have been updated
+        updatedUserTrophies = currentUserDocumentReference.get().get().getLong("trophies");
+        assertEquals(currentUser.getTrophies() + 1, updatedUserTrophies);
     }
 
     @AfterAll
