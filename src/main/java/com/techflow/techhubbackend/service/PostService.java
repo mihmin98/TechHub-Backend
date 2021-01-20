@@ -191,9 +191,10 @@ public class PostService {
     public void removeUpvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
         PostModel postModel = getPost(id);
         Set<String> upvotes = postModel.getUpvotes();
+        String userEmail = getEmailFromJWT(jwt);
 
-        if (upvotes.contains(getEmailFromJWT(jwt))) {
-            upvotes.remove(getEmailFromJWT(jwt));
+        if (upvotes.contains(userEmail)) {
+            upvotes.remove(userEmail);
             postModel.setUpvotes(upvotes);
 
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
@@ -210,9 +211,10 @@ public class PostService {
     public void removeDownvotePost(String id, String jwt) throws ExecutionException, InterruptedException {
         PostModel postModel = getPost(id);
         Set<String> downvotes = postModel.getDownvotes();
+        String userEmail = getEmailFromJWT(jwt);
 
-        if (downvotes.contains(getEmailFromJWT(jwt))) {
-            downvotes.remove(getEmailFromJWT(jwt));
+        if (downvotes.contains(userEmail)) {
+            downvotes.remove(userEmail);
             postModel.setDownvotes(downvotes);
 
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
@@ -226,16 +228,18 @@ public class PostService {
         }
     }
 
-    public void awardTrophy(String id) throws ExecutionException, InterruptedException {
+    public void awardTrophy(String id, String jwt) throws ExecutionException, InterruptedException {
+        boolean vipStatus = getUserVipStatus(jwt);
+
         PostModel postModel = getPost(id);
-        ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId()));
+        ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId(), vipStatus));
 
         if (!postModel.isHasTrophy() && !threadModel.getHasTrophy()) {
             postModel.setHasTrophy(true);
             updatePost(id, postModel);
 
             threadModel.setHasTrophy(true);
-            threadService.updateThread(postModel.getThreadId(), threadModel);
+            threadService.updateThread(postModel.getThreadId(), threadModel, threadModel.getVipStatus());
 
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
             UserModel userModel = new UserModel();
@@ -248,5 +252,10 @@ public class PostService {
     private String getEmailFromJWT(String jwt) {
         DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
         return decodedJWT.getSubject();
+    }
+
+    private boolean getUserVipStatus(String jwt) {
+        DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
+        return decodedJWT.getClaim("userVipStatus").asBoolean();
     }
 }

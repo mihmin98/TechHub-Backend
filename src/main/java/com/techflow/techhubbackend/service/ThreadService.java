@@ -44,7 +44,7 @@ public class ThreadService {
 
         for (var thread : convertedList) {
             if (thread.getTitle() == null)
-                 continue;
+                continue;
             Pattern pattern = Pattern.compile(title);
             Matcher matcherTitle = pattern.matcher(thread.getTitle().toLowerCase());
             Matcher matcherText = pattern.matcher(thread.getText().toLowerCase());
@@ -64,22 +64,26 @@ public class ThreadService {
                 .collect(Collectors.toList());
     }
 
-    public ThreadModel getThread(String id) throws ExecutionException, InterruptedException {
-        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+    public ThreadModel getThread(String id, boolean vipStatus) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
         ThreadModel threadModel;
-        if (documentReference.exists()) {
-            threadModel = new ThreadModel(Objects.requireNonNull(documentReference.getData()));
-            threadModel.setDateCreated(Objects.requireNonNull(documentReference.getCreateTime()).toDate());
+        if (documentSnapshot.exists()) {
+            if (!vipStatus && Objects.requireNonNull(documentSnapshot.getBoolean("vipStatus")))
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
+            threadModel = new ThreadModel(Objects.requireNonNull(documentSnapshot.getData()));
+            threadModel.setDateCreated(Objects.requireNonNull(documentSnapshot.getCreateTime()).toDate());
             return threadModel;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
         }
     }
 
-    public String createThread(ThreadModel thread) throws ExecutionException, InterruptedException, JsonProcessingException {
+    public String createThread(ThreadModel thread, boolean vipStatus) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         thread.setId(documentReference.getId());
+        thread.setVipStatus(vipStatus);
+        thread.setHasTrophy(false);
         documentReference.set(thread.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -87,23 +91,28 @@ public class ThreadService {
         node.put("threadId", documentReference.getId());
 
         return mapper.writeValueAsString(node);
-
     }
 
-    public void updateThread(String id, ThreadModel thread) throws ExecutionException, InterruptedException {
-        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+    public void updateThread(String id, ThreadModel thread, boolean vipStatus) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
-        if (!documentReference.exists())
+        if (!documentSnapshot.exists())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+
+        if (!vipStatus && Objects.requireNonNull(documentSnapshot.getBoolean("vipStatus")))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(thread.generateMap(false)).get();
     }
 
-    public void deleteThread(String id) throws ExecutionException, InterruptedException {
+    public void deleteThread(String id, boolean vipStatus) throws ExecutionException, InterruptedException {
         DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
         if (!documentReference.exists())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+
+        if (!vipStatus && Objects.requireNonNull(documentReference.getBoolean("vipStatus")))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
 
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection("post").whereEqualTo("threadId", id).get().get().getDocuments();
 
