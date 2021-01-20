@@ -42,7 +42,7 @@ public class DiscountModel {
         this.description = (String) map.getOrDefault("description", "no seller description");
         this.pictures = (ArrayList<String>) map.getOrDefault("pictures", new ArrayList<String>());
         this.pointsCost = ((Long) map.getOrDefault("pointsCost", 0)).intValue();
-        this.vipStatus = (Boolean) map.getOrDefault("vipStatus", 0);
+        this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
     }
 
     public String getId() {
