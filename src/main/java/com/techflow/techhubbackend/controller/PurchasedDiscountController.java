@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_HEADER_STRING;
+
 @RestController
 @RequestMapping("/purchasedDiscount")
 public class PurchasedDiscountController {
@@ -27,8 +29,8 @@ public class PurchasedDiscountController {
     }
 
     @PostMapping("")
-    public String createPurchasedDiscount(@RequestBody PurchasedDiscountModel purchasedDiscountModel) throws ExecutionException, InterruptedException, JsonProcessingException {
-        return purchasedDiscountService.createPurchasedDiscount(purchasedDiscountModel);
+    public String createPurchasedDiscount(@RequestBody String discountId, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
+        return purchasedDiscountService.createPurchasedDiscount(discountId, jwt);
     }
 
     @PutMapping("{id}")
@@ -45,5 +47,4 @@ public class PurchasedDiscountController {
     public List<PurchasedDiscountModel> getPurchasedDiscountsByPurchaser(@PathVariable("purchaserEmail") String purchaserEmail) throws ExecutionException, InterruptedException {
         return purchasedDiscountService.getPurchasedDiscountsByPurchaser(purchaserEmail);
     }
-
 }

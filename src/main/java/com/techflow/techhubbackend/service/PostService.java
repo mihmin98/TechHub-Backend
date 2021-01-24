@@ -65,6 +65,7 @@ public class PostService {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         postModel.setId(documentReference.getId());
         postModel.setPostNumber(getPostsCountByThreadId(postModel.getThreadId()) + 1);
+        postModel.setHasTrophy(false);
         documentReference.set(postModel.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();
