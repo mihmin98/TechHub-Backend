@@ -80,6 +80,7 @@ public class ThreadService {
     public String createThread(ThreadModel thread) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         thread.setId(documentReference.getId());
+        thread.setHasTrophy(false);
         documentReference.set(thread.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();
