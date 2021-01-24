@@ -69,7 +69,7 @@ public class PostController {
     }
 
     @PutMapping("{id}/awardTrophy")
-    public void awardTrophy(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
-        postService.awardTrophy(id);
+    public void awardTrophy(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        postService.awardTrophy(id, jwt);
     }
 }

@@ -53,23 +53,30 @@ public class ThreadController {
     }
 
     @GetMapping("{id}")
-    public ThreadModel getThread(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
-        return threadService.getThread(id);
+    public ThreadModel getThread(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        return threadService.getThread(id, getUserVipStatus(jwt));
     }
 
     @PostMapping("")
     public String createThread(@RequestBody ThreadModel thread) throws ExecutionException, InterruptedException, JsonProcessingException {
-        return threadService.createThread(thread);
+        return threadService.createThread(thread, false);
+    }
+
+    @PostMapping("/vip")
+    public String createVipThread(@RequestBody ThreadModel thread, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
+        if (!getUserVipStatus(jwt))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
+        return threadService.createThread(thread, true);
     }
 
     @PutMapping("{id}")
-    public void updateThread(@PathVariable("id") String id, @RequestBody ThreadModel thread) throws ExecutionException, InterruptedException {
-        threadService.updateThread(id, thread);
+    public void updateThread(@PathVariable("id") String id, @RequestBody ThreadModel thread, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        threadService.updateThread(id, thread, getUserVipStatus(jwt));
     }
 
     @DeleteMapping("{id}")
-    public void deleteThread(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
-        threadService.deleteThread(id);
+    public void deleteThread(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        threadService.deleteThread(id, getUserVipStatus(jwt));
     }
 
     @GetMapping("/categories")

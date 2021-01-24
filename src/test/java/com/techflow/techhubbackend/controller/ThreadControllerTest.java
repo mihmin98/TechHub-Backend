@@ -226,8 +226,8 @@ public class ThreadControllerTest {
         assertEquals(thread.getTitle(), createdThread.getTitle());
         assertEquals(thread.getCategory(), createdThread.getCategory());
         assertEquals(thread.getText(), createdThread.getText());
-        assertEquals(thread.getHasTrophy(), createdThread.getHasTrophy());
-        assertEquals(thread.getVipStatus(), createdThread.getVipStatus());
+        assertEquals(false, createdThread.getHasTrophy());
+        assertEquals(false, createdThread.getVipStatus());
     }
 
     @Test
@@ -273,7 +273,6 @@ public class ThreadControllerTest {
 
     @Test
     void deleteThread() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
         ThreadModel thread = new ThreadModel(testThreadModel);
         DocumentReference documentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
 
@@ -679,6 +678,167 @@ public class ThreadControllerTest {
 
         assertTrue(threads.size() > 0);
         assertTrue(foundThread);
+    }
+
+    @Test
+    void getVIPThread() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        ThreadModel thread = new ThreadModel(testThreadModel);
+        thread.setVipStatus(true);
+        DocumentReference documentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
+
+        // Try to get non existing thread
+        mockMvc.perform(get("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, vipJwt))
+                .andExpect(status().isNotFound());
+
+        // Create a thread
+        thread.setId(documentReference.getId());
+        documentReference.set(thread.generateMap()).get();
+
+        threadsToDelete.add(documentReference.getId());
+
+        // Try to get thread with non vip user
+        mockMvc.perform(get("/thread/" + thread.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, regularJwt))
+                .andExpect(status().isUnauthorized());
+
+        // Get thread
+        String threadJson = mockMvc.perform(get("/thread/" + thread.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, vipJwt))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+
+        ThreadModel getResult = mapper.readValue(threadJson, ThreadModel.class);
+
+        assertEquals(thread.getId(), getResult.getId());
+        assertEquals(thread.getOwnerEmail(), getResult.getOwnerEmail());
+        assertEquals(thread.getTitle(), getResult.getTitle());
+        assertEquals(thread.getCategory(), getResult.getCategory());
+        assertEquals(thread.getText(), getResult.getText());
+        assertEquals(thread.getHasTrophy(), getResult.getHasTrophy());
+        assertEquals(thread.getVipStatus(), getResult.getVipStatus());
+        assertNotNull(getResult.getDateCreated());
+    }
+
+    @Test
+    void createVIPThread() throws Exception {
+        ThreadModel thread = new ThreadModel(testThreadModel);
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Try to POST thread with non vip user
+        mockMvc.perform(post("/thread/vip")
+                .header(SecurityConstants.AUTH_HEADER_STRING, regularJwt)
+                .content(mapper.writeValueAsString(testThreadModel))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+
+        // POST thread
+        String threadIdJson = mockMvc.perform(post("/thread/vip")
+                .header(SecurityConstants.AUTH_HEADER_STRING, vipJwt)
+                .content(mapper.writeValueAsString(testThreadModel))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String threadId = (String) mapper.readValue(threadIdJson, HashMap.class).get("threadId");
+        threadsToDelete.add(threadId);
+
+        DocumentSnapshot document = dbFirestore.collection(THREADS_COLLECTION_NAME).document(threadId).get().get();
+        ThreadModel createdThread = new ThreadModel(Objects.requireNonNull(document.getData()));
+
+        assertEquals(threadId, createdThread.getId());
+        assertEquals(thread.getOwnerEmail(), createdThread.getOwnerEmail());
+        assertEquals(thread.getTitle(), createdThread.getTitle());
+        assertEquals(thread.getCategory(), createdThread.getCategory());
+        assertEquals(thread.getText(), createdThread.getText());
+        assertEquals(false, createdThread.getHasTrophy());
+        assertEquals(true, createdThread.getVipStatus());
+    }
+
+    @Test
+    void putVIPThread() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        ThreadModel thread = new ThreadModel(testThreadModel);
+        DocumentReference documentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
+
+        // Try to PUT non existing thread
+        mockMvc.perform(put("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, regularJwt)
+                .content("{}")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        // Create a thread
+        thread.setId(documentReference.getId());
+        thread.setVipStatus(true);
+        documentReference.set(thread.generateMap()).get();
+
+        threadsToDelete.add(documentReference.getId());
+
+        ThreadModel putThread = new ThreadModel();
+        putThread.setText(threadControllerTestDataProperties.getThreadPutText());
+
+        // Try to update a field as a non vip user
+        mockMvc.perform(put("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, regularJwt)
+                .content(mapper.writeValueAsString(putThread))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+
+        // Try to update a field
+        mockMvc.perform(put("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, vipJwt)
+                .content(mapper.writeValueAsString(putThread))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        DocumentSnapshot document = dbFirestore.collection(THREADS_COLLECTION_NAME).document(documentReference.getId()).get().get();
+        ThreadModel dbThread = new ThreadModel(Objects.requireNonNull(document.getData()));
+
+        assertEquals(documentReference.getId(), dbThread.getId());
+        assertEquals(thread.getOwnerEmail(), dbThread.getOwnerEmail());
+        assertEquals(thread.getTitle(), dbThread.getTitle());
+        assertEquals(thread.getCategory(), dbThread.getCategory());
+        assertEquals(thread.getHasTrophy(), dbThread.getHasTrophy());
+        assertEquals(thread.getVipStatus(), dbThread.getVipStatus());
+        assertEquals(threadControllerTestDataProperties.getThreadPutText(), dbThread.getText());
+    }
+
+    @Test
+    void deleteVIPThread() throws Exception {
+        ThreadModel thread = new ThreadModel(testThreadModel);
+        thread.setVipStatus(true);
+        DocumentReference documentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
+
+        // Try to DELETE non existing thread
+        mockMvc.perform(delete("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, vipJwt))
+                .andExpect(status().isNotFound());
+
+        // Create a thread
+        thread.setId(documentReference.getId());
+        documentReference.set(thread.generateMap()).get();
+
+        threadsToDelete.add(documentReference.getId());
+
+        // Try to DELETE thread as non vip user
+        mockMvc.perform(delete("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, regularJwt))
+                .andExpect(status().isUnauthorized());
+
+        // DELETE thread
+        mockMvc.perform(delete("/thread/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, vipJwt))
+                .andExpect(status().isOk());
+
+        assertFalse(documentReference.get().get().exists());
     }
 
     @AfterAll

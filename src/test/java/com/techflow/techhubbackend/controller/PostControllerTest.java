@@ -641,6 +641,7 @@ public class PostControllerTest {
         // Create a new thread
         ThreadModel thread = new ThreadModel();
         thread.setHasTrophy(false);
+        thread.setVipStatus(false);
 
         DocumentReference threadDocumentReference = dbFirestore.collection(THREADS_COLLECTION_NAME).document();
         thread.setId(threadDocumentReference.getId());
