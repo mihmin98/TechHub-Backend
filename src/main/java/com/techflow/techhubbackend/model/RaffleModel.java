@@ -40,7 +40,7 @@ public class RaffleModel {
     public RaffleModel(Map<String, Object> map) {
         this.id = (String) map.getOrDefault("id", "no id");
         this.prize = (Long) map.getOrDefault("prize", 0);
-        this.entries = (List<String>) map.getOrDefault("entries", null);
+        this.entries = (List<String>) map.getOrDefault("entries", new ArrayList<>());
         this.createTime = (Timestamp) map.getOrDefault("createTime", null);
         this.drawTime = (Timestamp) map.getOrDefault("drawTime", null);
         this.winner = (String) map.getOrDefault("winner", "no winner");

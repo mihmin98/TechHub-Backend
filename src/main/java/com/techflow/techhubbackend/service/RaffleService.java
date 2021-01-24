@@ -35,7 +35,7 @@ public class RaffleService {
     private TaskScheduler taskScheduler;
 
     @PostConstruct
-    private void init() throws ExecutionException, InterruptedException {
+    public void init() throws ExecutionException, InterruptedException {
         RaffleModel activeRaffle = getActiveRaffle();
 
         if (activeRaffle == null)
@@ -129,11 +129,11 @@ public class RaffleService {
         long updatedPrize = Objects.requireNonNull(raffleDocumentSnapshot.getLong("prize")) + ((Double) (raffleProperties.getEntryCost() * raffleProperties.getWinningsPercentage())).longValue();
 
         raffleDocumentReference.update("entries", activeRaffle.getEntries(),
-                "prize", updatedPrize);
+                "prize", updatedPrize).get();
 
         // Remove cost from user points
         long updatedUserCurrentPoints = Objects.requireNonNull(userDocumentSnapshot.getLong("currentPoints")) - raffleProperties.getEntryCost();
-        userDocumentReference.update("currentPoints", updatedUserCurrentPoints);
+        userDocumentReference.update("currentPoints", updatedUserCurrentPoints).get();
     }
 
     private void drawWinner() {
@@ -144,7 +144,7 @@ public class RaffleService {
             String winner = entries.get(new Random().nextInt(entries.size()));
 
             dbFirestore.collection(COLLECTION_NAME).document(raffle.getId()).update("winner", winner,
-                    "isActive", false);
+                    "isActive", false).get();
 
             // Update winner points
             DocumentReference userDocumentReference = dbFirestore.collection("user").document(winner);
@@ -153,7 +153,7 @@ public class RaffleService {
             long updatedTotalPoints = raffle.getPrize() + Objects.requireNonNull(userDocumentSnapshot.getLong("totalPoints"));
 
             userDocumentReference.update("currentPoints", updatedCurrentPoints,
-                    "totalPoints", updatedTotalPoints);
+                    "totalPoints", updatedTotalPoints).get();
 
             // Create and schedule new raffle
             RaffleModel newRaffle = createNewRaffle();
@@ -180,7 +180,7 @@ public class RaffleService {
         Timestamp drawTime = Timestamp.of(calendar.getTime());
 
         documentReference.update("createTime", createTime,
-                "drawTime", drawTime);
+                "drawTime", drawTime).get();
 
         newRaffle.setCreateTime(createTime);
         newRaffle.setDrawTime(drawTime);

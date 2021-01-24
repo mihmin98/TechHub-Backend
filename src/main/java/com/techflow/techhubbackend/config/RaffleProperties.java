@@ -8,13 +8,13 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:raffle.properties")
 public class RaffleProperties {
 
-    @Value("raffle.daysBetweenRaffles")
+    @Value("${raffle.daysBetweenRaffles}")
     private Integer daysBetweenRaffles;
 
-    @Value("raffle.entryCost")
+    @Value("${raffle.entryCost}")
     private Integer entryCost;
 
-    @Value("raffle.winningsPercentage")
+    @Value("${raffle.winningsPercentage}")
     private Double winningsPercentage;
 
     public Integer getDaysBetweenRaffles() {
