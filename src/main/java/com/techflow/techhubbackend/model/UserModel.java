@@ -16,6 +16,7 @@ public class UserModel implements Comparable<UserModel>{
     private int currentPoints;
     private int trophies;
     private boolean vipStatus;
+    private Long rafflesWon;
 
     public UserModel() {
     }
@@ -30,7 +31,7 @@ public class UserModel implements Comparable<UserModel>{
     }
 
     public UserModel(String email, String password, String username, UserType type, String profilePicture,
-                     String accountStatus, int totalPoints, int currentPoints, int trophies, boolean vipStatus) {
+                     String accountStatus, int totalPoints, int currentPoints, int trophies, boolean vipStatus, Long rafflesWon) {
         this.email = email;
         this.password = password;
         this.username = username;
@@ -42,6 +43,7 @@ public class UserModel implements Comparable<UserModel>{
             this.currentPoints = currentPoints;
             this.trophies = trophies;
             this.vipStatus = vipStatus;
+            this.rafflesWon = rafflesWon;
         }
     }
 
@@ -57,6 +59,7 @@ public class UserModel implements Comparable<UserModel>{
             this.currentPoints = userModel.getCurrentPoints();
             this.trophies=userModel.trophies;
             this.vipStatus = userModel.isVipStatus();
+            this.rafflesWon = userModel.getRafflesWon();
         }
     }
 
@@ -72,6 +75,7 @@ public class UserModel implements Comparable<UserModel>{
             this.currentPoints = ((Long) map.getOrDefault("currentPoints", 0)).intValue();
             this.trophies = ((Long) map.getOrDefault("trophies", 0)).intValue();
             this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
+            this.rafflesWon = (Long) map.getOrDefault("rafflesWon", 0);
         }
     }
 
@@ -151,6 +155,10 @@ public class UserModel implements Comparable<UserModel>{
         this.vipStatus = vipStatus;
     }
 
+    public Long getRafflesWon() { return rafflesWon; }
+
+    public void setRafflesWon(Long rafflesWon) { this.rafflesWon = rafflesWon; }
+
     @Override
     public String toString() {
         String s = "UserModel{" +
@@ -165,7 +173,8 @@ public class UserModel implements Comparable<UserModel>{
             s += ", totalPoints=" + totalPoints +
                     ", currentPoints=" + currentPoints +
                     ", trophies=" + trophies +
-                    ", vipStatus=" + vipStatus;
+                    ", vipStatus=" + vipStatus +
+                    ", rafflesWon='" + rafflesWon + '\'';
 
         s += "}";
         return s;
@@ -188,7 +197,8 @@ public class UserModel implements Comparable<UserModel>{
             eq = eq && totalPoints == userModel.totalPoints &&
                     currentPoints == userModel.currentPoints &&
                     trophies == userModel.trophies &&
-                    vipStatus == userModel.vipStatus;
+                    vipStatus == userModel.vipStatus &&
+                    rafflesWon.equals(userModel.rafflesWon);
         }
 
         return eq;
@@ -196,7 +206,7 @@ public class UserModel implements Comparable<UserModel>{
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, trophies, vipStatus);
+        return Objects.hash(email, password, username, type, profilePicture, accountStatus, totalPoints, currentPoints, trophies, vipStatus, rafflesWon);
     }
 
     public Map<String, Object> generateMap() {
@@ -214,6 +224,7 @@ public class UserModel implements Comparable<UserModel>{
             map.put("currentPoints", currentPoints);
             map.put("trophies", trophies);
             map.put("vipStatus", vipStatus);
+            map.put("rafflesWon", rafflesWon);
         }
 
         return map;
@@ -240,6 +251,7 @@ public class UserModel implements Comparable<UserModel>{
             map.put("currentPoints", currentPoints);
             map.put("trophies", trophies);
             map.put("vipStatus", vipStatus);
+            map.put("rafflesWon", rafflesWon);
         }
 
         return map;
