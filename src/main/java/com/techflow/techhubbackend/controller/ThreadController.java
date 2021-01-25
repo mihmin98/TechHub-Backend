@@ -5,6 +5,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
+import com.techflow.techhubbackend.model.UserType;
 import com.techflow.techhubbackend.service.PostService;
 import com.techflow.techhubbackend.service.ThreadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class ThreadController {
 
     @GetMapping("/vip/title/{title}")
     public List<ThreadModel> getVIPThreadsByTitle(@PathVariable("title") String title, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
-        if (!getUserVipStatus(jwt))
+        if (!getUserVipStatus(jwt) && getUserTypeFromJwt(jwt) != UserType.MODERATOR)
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
         return threadService.getThreadsByTitle(title, true);
     }
@@ -47,7 +48,7 @@ public class ThreadController {
 
     @GetMapping("/vip")
     public List<ThreadModel> getAllVIPThreads(@RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
-        if (!getUserVipStatus(jwt))
+        if (!getUserVipStatus(jwt) && getUserTypeFromJwt(jwt) != UserType.MODERATOR)
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
         return threadService.getAllThreads(true);
     }
@@ -64,19 +65,19 @@ public class ThreadController {
 
     @PostMapping("/vip")
     public String createVipThread(@RequestBody ThreadModel thread, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
-        if (!getUserVipStatus(jwt))
+        if (!getUserVipStatus(jwt) && getUserTypeFromJwt(jwt) != UserType.MODERATOR)
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
         return threadService.createThread(thread, true);
     }
 
     @PutMapping("{id}")
     public void updateThread(@PathVariable("id") String id, @RequestBody ThreadModel thread, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
-        threadService.updateThread(id, thread, getUserVipStatus(jwt));
+        threadService.updateThread(id, thread, getUserVipStatus(jwt) || getUserTypeFromJwt(jwt) == UserType.MODERATOR);
     }
 
     @DeleteMapping("{id}")
     public void deleteThread(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
-        threadService.deleteThread(id, getUserVipStatus(jwt));
+        threadService.deleteThread(id, getUserVipStatus(jwt) || getUserTypeFromJwt(jwt) == UserType.MODERATOR);
     }
 
     @GetMapping("/categories")
@@ -91,7 +92,7 @@ public class ThreadController {
 
     @GetMapping("/vip/categories/{category}")
     public List<ThreadModel> getVIPThreadsByCategory(@PathVariable("category") String category, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
-        if (!getUserVipStatus(jwt))
+        if (!getUserVipStatus(jwt) && getUserTypeFromJwt(jwt) != UserType.MODERATOR)
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not a VIP");
         return threadService.getThreadsByCategory(category, true);
     }
@@ -109,5 +110,10 @@ public class ThreadController {
     private boolean getUserVipStatus(String jwt) {
         DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
         return decodedJWT.getClaim("userVipStatus").asBoolean();
+    }
+
+    private UserType getUserTypeFromJwt(String jwt) {
+        DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
+        return UserType.valueOf(decodedJWT.getClaim("userType").asString());
     }
 }
