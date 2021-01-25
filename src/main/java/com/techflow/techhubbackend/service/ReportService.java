@@ -68,6 +68,18 @@ public class ReportService {
         if(reportModel.getReportType() == null){ reportModel.setReportType(ReportType.OTHERS);}
         if(reportModel.getIsResolved() == null){ reportModel.setIsResolved(false); }
 
+        if(reportModel.getIsPostReport()){
+            PostModel postModel = new PostModel();
+            postModel.setIsReported(true);
+            postService.updatePost(reportModel.getReportedItemId(), postModel);
+        }
+        else
+        {
+            ThreadModel threadModel = new ThreadModel();
+            threadModel.setIsReported(true);
+            threadService.updateUnauthorizedThread(reportModel.getReportedItemId(), threadModel);
+        }
+
         documentReference.set(reportModel.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();

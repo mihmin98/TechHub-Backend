@@ -77,7 +77,7 @@ public class ThreadControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testThreadModel = new ThreadModel(null, threadControllerTestDataProperties.getThreadOwnerEmail(), threadControllerTestDataProperties.getThreadTitle(), threadControllerTestDataProperties.getThreadCategory(), threadControllerTestDataProperties.getThreadText(), null, threadControllerTestDataProperties.getHasTrophy(), threadControllerTestDataProperties.getVipStatus());
+        testThreadModel = new ThreadModel(null, threadControllerTestDataProperties.getThreadOwnerEmail(), threadControllerTestDataProperties.getThreadTitle(), threadControllerTestDataProperties.getThreadCategory(), threadControllerTestDataProperties.getThreadText(), null, threadControllerTestDataProperties.getHasTrophy(), threadControllerTestDataProperties.getVipStatus(), threadControllerTestDataProperties.getIsReported());
 
         // Create non-vip user
         UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
@@ -198,6 +198,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getText(), getResult.getText());
         assertEquals(thread.getHasTrophy(), getResult.getHasTrophy());
         assertEquals(thread.getVipStatus(), getResult.getVipStatus());
+        assertEquals(thread.getIsReported(), getResult.getIsReported());
         assertNotNull(getResult.getDateCreated());
     }
 
@@ -228,6 +229,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getText(), createdThread.getText());
         assertEquals(false, createdThread.getHasTrophy());
         assertEquals(false, createdThread.getVipStatus());
+        assertEquals(false, createdThread.getIsReported());
     }
 
     @Test
@@ -268,6 +270,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getCategory(), dbThread.getCategory());
         assertEquals(thread.getHasTrophy(), dbThread.getHasTrophy());
         assertEquals(thread.getVipStatus(), dbThread.getVipStatus());
+        assertEquals(thread.getIsReported(), dbThread.getIsReported());
         assertEquals(threadControllerTestDataProperties.getThreadPutText(), dbThread.getText());
     }
 
@@ -376,7 +379,7 @@ public class ThreadControllerTest {
         // Create a few posts
         int numOfPosts = 3;
         for (int i = 0; i < numOfPosts; ++i) {
-            PostModel post = new PostModel(null, thread.getOwnerEmail(), thread.getId(), null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes());
+            PostModel post = new PostModel(null, thread.getOwnerEmail(), thread.getId(), null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes(), postControllerTestDataProperties.getIsReported());
 
             DocumentReference postDocumentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
             post.setId(postDocumentReference.getId());
@@ -430,7 +433,7 @@ public class ThreadControllerTest {
         // Create some posts
         int numOfPosts = 3;
         for (int i = 0; i < numOfPosts; ++i) {
-            PostModel post = new PostModel(null, thread.getOwnerEmail(), thread.getId(), null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes());
+            PostModel post = new PostModel(null, thread.getOwnerEmail(), thread.getId(), null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes(), postControllerTestDataProperties.getIsReported());
 
             DocumentReference postDocumentReference = dbFirestore.collection(POSTS_COLLECTION_NAME).document();
             post.setId(postDocumentReference.getId());
@@ -525,6 +528,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getText(), receivedThread.getText());
         assertEquals(thread.getHasTrophy(), receivedThread.getHasTrophy());
         assertEquals(thread.getVipStatus(), receivedThread.getVipStatus());
+        assertEquals(thread.getIsReported(), receivedThread.getIsReported());
     }
 
     @Test
@@ -594,6 +598,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getText(), receivedThread.getText());
         assertEquals(thread.getHasTrophy(), receivedThread.getHasTrophy());
         assertEquals(thread.getVipStatus(), receivedThread.getVipStatus());
+        assertEquals(thread.getIsReported(), receivedThread.getIsReported());
     }
 
     @Test
@@ -722,6 +727,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getText(), getResult.getText());
         assertEquals(thread.getHasTrophy(), getResult.getHasTrophy());
         assertEquals(thread.getVipStatus(), getResult.getVipStatus());
+        assertEquals(thread.getIsReported(), getResult.getIsReported());
         assertNotNull(getResult.getDateCreated());
     }
 
@@ -760,6 +766,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getText(), createdThread.getText());
         assertEquals(false, createdThread.getHasTrophy());
         assertEquals(true, createdThread.getVipStatus());
+        assertEquals(false, createdThread.getIsReported());
     }
 
     @Test
@@ -808,6 +815,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getCategory(), dbThread.getCategory());
         assertEquals(thread.getHasTrophy(), dbThread.getHasTrophy());
         assertEquals(thread.getVipStatus(), dbThread.getVipStatus());
+        assertEquals(thread.getIsReported(), dbThread.getIsReported());
         assertEquals(threadControllerTestDataProperties.getThreadPutText(), dbThread.getText());
     }
 

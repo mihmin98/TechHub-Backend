@@ -119,6 +119,15 @@ public class ThreadService {
         dbFirestore.collection(COLLECTION_NAME).document(id).update(thread.generateMap(false)).get();
     }
 
+    public void updateUnauthorizedThread(String id, ThreadModel thread) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+
+        if (!documentSnapshot.exists())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(thread.generateMap(false)).get();
+    }
+
     public void deleteThread(String id, boolean vipStatus) throws ExecutionException, InterruptedException {
         DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 

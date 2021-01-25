@@ -68,7 +68,7 @@ public class PostControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testPostModel = new PostModel(null, postControllerTestDataProperties.getPostUserEmail(), null, null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes());
+        testPostModel = new PostModel(null, postControllerTestDataProperties.getPostUserEmail(), null, null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes(), postControllerTestDataProperties.getIsReported());
         UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
         user.setType(UserType.REGULAR_USER);
         user.setCurrentPoints(userTestDataProperties.getUserCurrentPoints());
@@ -168,6 +168,7 @@ public class PostControllerTest {
         assertEquals(post.isHasTrophy(), receivedPost.isHasTrophy());
         assertEquals(post.getUpvotes(), receivedPost.getUpvotes());
         assertEquals(post.getDownvotes(), receivedPost.getDownvotes());
+        assertEquals(post.getIsReported(), receivedPost.getIsReported());
     }
 
     @Test
@@ -208,6 +209,7 @@ public class PostControllerTest {
         assertEquals(post.isHasTrophy(), createdPost.isHasTrophy());
         assertEquals(post.getUpvotes(), createdPost.getUpvotes());
         assertEquals(post.getDownvotes(), createdPost.getDownvotes());
+        assertEquals(post.getIsReported(), createdPost.getIsReported());
     }
 
     @Test
@@ -250,6 +252,7 @@ public class PostControllerTest {
         assertEquals(post.isHasTrophy(), dbPost.isHasTrophy());
         assertEquals(post.getUpvotes(), dbPost.getUpvotes());
         assertEquals(post.getDownvotes(), dbPost.getDownvotes());
+        assertEquals(post.getIsReported(), dbPost.getIsReported());
     }
 
     @Test

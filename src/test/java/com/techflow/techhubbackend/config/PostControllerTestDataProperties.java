@@ -28,6 +28,9 @@ public class PostControllerTestDataProperties {
     @Value("${post.put.text}")
     private String postPutText;
 
+    @Value("${post.isReported}")
+    private Boolean isReported;
+
     public PostControllerTestDataProperties() {
     }
 
@@ -74,6 +77,10 @@ public class PostControllerTestDataProperties {
     public String getPostPutText() {
         return postPutText;
     }
+
+    public Boolean getIsReported() { return isReported; }
+
+    public void setIsReported(Boolean reported) { isReported = reported; }
 
     public void setPostPutText(String postPutText) {
         this.postPutText = postPutText;
