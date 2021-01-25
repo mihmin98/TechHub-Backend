@@ -34,6 +34,14 @@ public class DiscountService {
                 .collect(Collectors.toList());
     }
 
+    public List<DiscountModel> getAllActiveDiscounts() throws ExecutionException, InterruptedException {
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("isActive", true).get().get().getDocuments();
+
+        return documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> new DiscountModel(queryDocumentSnapshot.getData()))
+                .collect(Collectors.toList());
+    }
+
     public DiscountModel getDiscount(String id) throws ExecutionException, InterruptedException {
         DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
@@ -49,6 +57,7 @@ public class DiscountService {
     public String createDiscount(DiscountModel discountModel) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         discountModel.setId(documentReference.getId());
+        discountModel.setActive(true);
         documentReference.set(discountModel.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -75,5 +84,17 @@ public class DiscountService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Discount not found");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).delete().get();
+    }
+
+    public void markDiscountAsInactive(String id) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+
+        if (!documentReference.exists())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Discount not found");
+
+        DiscountModel discountModel = new DiscountModel();
+        discountModel.setActive(false);
+
+        dbFirestore.collection(COLLECTION_NAME).document(id).update(discountModel.generateMap(false)).get();
     }
 }
