@@ -18,7 +18,7 @@ public class DiscountController {
 
     @GetMapping("")
     public List<DiscountModel> getAllDiscounts() throws ExecutionException, InterruptedException {
-        return discountService.getAllDiscounts();
+        return discountService.getAllActiveDiscounts();
     }
 
     @GetMapping("{id}")
@@ -38,6 +38,6 @@ public class DiscountController {
 
     @DeleteMapping("{id}")
     public void deleteDiscount(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
-        discountService.deleteDiscount(id);
+        discountService.markDiscountAsInactive(id);
     }
 }
