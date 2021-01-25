@@ -79,6 +79,20 @@ public class ThreadService {
         }
     }
 
+    public ThreadModel getUnauthorizedThread(String id) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+
+        ThreadModel threadModel;
+        if (documentSnapshot.exists()) {
+
+            threadModel = new ThreadModel(Objects.requireNonNull(documentSnapshot.getData()));
+            threadModel.setDateCreated(Objects.requireNonNull(documentSnapshot.getCreateTime()).toDate());
+            return threadModel;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Thread not found");
+        }
+    }
+
     public String createThread(ThreadModel thread, boolean vipStatus) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         thread.setId(documentReference.getId());
