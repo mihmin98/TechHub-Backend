@@ -77,7 +77,7 @@ public class ReportService {
         {
             ThreadModel threadModel = new ThreadModel();
             threadModel.setIsReported(true);
-            threadService.updateUnauthorizedThread(reportModel.getReportedItemId(), threadModel);
+            threadService.updateThread(reportModel.getReportedItemId(), threadModel, true);
         }
 
         documentReference.set(reportModel.generateMap()).get();
@@ -164,7 +164,7 @@ public class ReportService {
         for(String reportedThreadId : reportedThreadsIds){
             DocumentSnapshot documentSnapshot = dbFirestore.collection(THREAD_COLLECTION_NAME).document(reportedThreadId).get().get();
             if (documentSnapshot.exists()){
-                ThreadModel threadModel = threadService.getUnauthorizedThread(reportedThreadId);
+                ThreadModel threadModel = threadService.getThread(reportedThreadId, true);
                 reportedThreads.add(threadModel);
             }
         }
