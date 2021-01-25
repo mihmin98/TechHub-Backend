@@ -12,6 +12,7 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.techflow.techhubbackend.model.PostModel;
 import com.techflow.techhubbackend.model.ThreadModel;
 import com.techflow.techhubbackend.model.UserModel;
+import com.techflow.techhubbackend.model.UserType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -95,6 +96,7 @@ public class PostService {
         //revoke user points if his/her post is deleted
         UserModel userModel = new UserModel();
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+        userModel.setType(UserType.REGULAR_USER);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() - postModel.getUpvotes().size());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - postModel.getUpvotes().size());
         if(postModel.isHasTrophy()){ userModel.setTrophies(initialUserModel.getTrophies() - 1); }
