@@ -68,6 +68,18 @@ public class ReportService {
         if(reportModel.getReportType() == null){ reportModel.setReportType(ReportType.OTHERS);}
         if(reportModel.getIsResolved() == null){ reportModel.setIsResolved(false); }
 
+        if(reportModel.getIsPostReport()){
+            PostModel postModel = new PostModel();
+            postModel.setIsReported(true);
+            postService.updatePost(reportModel.getReportedItemId(), postModel);
+        }
+        else
+        {
+            ThreadModel threadModel = new ThreadModel();
+            threadModel.setIsReported(true);
+            threadService.updateThread(reportModel.getReportedItemId(), threadModel, true);
+        }
+
         documentReference.set(reportModel.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -152,7 +164,7 @@ public class ReportService {
         for(String reportedThreadId : reportedThreadsIds){
             DocumentSnapshot documentSnapshot = dbFirestore.collection(THREAD_COLLECTION_NAME).document(reportedThreadId).get().get();
             if (documentSnapshot.exists()){
-                ThreadModel threadModel = threadService.getUnauthorizedThread(reportedThreadId);
+                ThreadModel threadModel = threadService.getThread(reportedThreadId, true);
                 reportedThreads.add(threadModel);
             }
         }

@@ -15,11 +15,12 @@ public class PostModel {
     private Boolean hasTrophy;
     private Set<String> upvotes; //unique user emails
     private Set<String> downvotes;
+    private Boolean isReported;
 
     public PostModel() {
     }
 
-    public PostModel(String id, String userEmail, String threadId, Long postNumber, String text, Date dateCreated, boolean hasTrophy, Set<String> upvotes, Set<String> downvotes) {
+    public PostModel(String id, String userEmail, String threadId, Long postNumber, String text, Date dateCreated, boolean hasTrophy, Set<String> upvotes, Set<String> downvotes,  Boolean isReported) {
         this.id = id;
         this.userEmail = userEmail;
         this.threadId = threadId;
@@ -29,6 +30,7 @@ public class PostModel {
         this.hasTrophy = hasTrophy;
         this.upvotes = upvotes;
         this.downvotes = downvotes;
+        this.isReported = isReported;
     }
 
     public PostModel(PostModel postModel) {
@@ -41,6 +43,7 @@ public class PostModel {
         this.hasTrophy = postModel.isHasTrophy();
         this.upvotes =  new HashSet<>(postModel.getUpvotes());
         this.downvotes = new HashSet<>(postModel.getDownvotes());
+        this.isReported = postModel.getIsReported();
     }
 
     public PostModel(Map<String, Object> map) {
@@ -52,23 +55,18 @@ public class PostModel {
         this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", null);
         this.upvotes = new HashSet<String>((List<String>) map.getOrDefault("upvotes", new ArrayList<String>()));
         this.downvotes = new HashSet<String>((List<String>) map.getOrDefault("downvotes", new ArrayList<String>()));
+        this.isReported = (Boolean) map.getOrDefault("isReported", false);
     }
 
-    public String getId() {
-        return id;
-    }
+    public String getId() { return id; }
 
     public String getUserEmail() {
         return userEmail;
     }
 
-    public String getThreadId() {
-        return threadId;
-    }
+    public String getThreadId() { return threadId; }
 
-    public Long getPostNumber() {
-        return postNumber;
-    }
+    public Long getPostNumber() { return postNumber; }
 
     public String getText() {
         return text;
@@ -79,9 +77,7 @@ public class PostModel {
     }
 
     public Boolean isHasTrophy() {
-        if (hasTrophy == null) {
-            return false;
-        }
+        if (hasTrophy == null) { return false; }
         return hasTrophy;
     }
 
@@ -92,6 +88,8 @@ public class PostModel {
     public Set<String> getDownvotes() {
         return downvotes;
     }
+
+    public Boolean getIsReported() { return isReported; }
 
     public void setId(String id) {
         this.id = id;
@@ -129,6 +127,8 @@ public class PostModel {
         this.downvotes = downvotes;
     }
 
+    public void setIsReported(Boolean reported) { isReported = reported; }
+
     public PostModel builderSetDateCreated(Timestamp dateCreated) {
         this.dateCreated = dateCreated.toDate();
         return this;
@@ -146,6 +146,7 @@ public class PostModel {
                 ", hasTrophy=" + hasTrophy +
                 ", upvotes=" + upvotes +
                 ", downvotes=" + downvotes +
+                ", isReported=" + isReported +
                 '}';
     }
 
@@ -162,12 +163,13 @@ public class PostModel {
                 Objects.equals(text, postModel.text) &&
                 Objects.equals(dateCreated, postModel.dateCreated) &&
                 Objects.equals(upvotes, postModel.upvotes) &&
-                Objects.equals(downvotes, postModel.downvotes);
+                Objects.equals(downvotes, postModel.downvotes) &&
+                Objects.equals(isReported, postModel.isReported);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userEmail, threadId, postNumber, text, dateCreated, hasTrophy, upvotes, downvotes);
+        return Objects.hash(id, userEmail, threadId, postNumber, text, dateCreated, hasTrophy, upvotes, downvotes, isReported);
     }
 
     public Map<String, Object> generateMap() {
@@ -180,12 +182,9 @@ public class PostModel {
         map.put("text", text);
         map.put("dateCreated", dateCreated);
         map.put("hasTrophy", hasTrophy);
-        if(upvotes != null) {
-            map.put("upvotes", Arrays.asList(upvotes.toArray()));
-        }
-        if(downvotes != null){
-            map.put("downvotes", Arrays.asList(downvotes.toArray()));
-        }
+        if(upvotes != null) { map.put("upvotes", Arrays.asList(upvotes.toArray())); }
+        if(downvotes != null){ map.put("downvotes", Arrays.asList(downvotes.toArray())); }
+        map.put("isReported", isReported);
 
         return map;
     }
@@ -211,6 +210,8 @@ public class PostModel {
             map.put("upvotes", Arrays.asList(upvotes.toArray()));
         if (downvotes != null || includeEmptyFields)
             map.put("downvotes", Arrays.asList(downvotes.toArray()));
+        if (isReported != null || includeEmptyFields)
+            map.put("isReported", isReported);
 
         return map;
     }

@@ -26,6 +26,9 @@ public class ThreadControllerTestDataProperties {
     @Value("${thread.vipStatus}")
     private Boolean vipStatus;
 
+    @Value("${thread.isReported}")
+    private Boolean isReported;
+
     @Value("${thread.put.text}")
     private String threadPutText;
 
@@ -79,4 +82,8 @@ public class ThreadControllerTestDataProperties {
     public Boolean getVipStatus() { return vipStatus; }
 
     public void setVipStatus(Boolean vipStatus) { this.vipStatus = vipStatus; }
+
+    public Boolean getIsReported() { return isReported; }
+
+    public void setIsReported(Boolean reported) { isReported = reported; }
 }

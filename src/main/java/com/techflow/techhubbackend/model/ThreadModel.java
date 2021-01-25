@@ -17,11 +17,12 @@ public class ThreadModel {
     private Date dateCreated;
     private Boolean hasTrophy;
     private Boolean vipStatus;
+    private Boolean isReported;
 
     public ThreadModel() {
     }
 
-    public ThreadModel(String id, String ownerEmail, String title, String category, String text, Date dateCreated, Boolean hasTrophy, Boolean vipStatus) {
+    public ThreadModel(String id, String ownerEmail, String title, String category, String text, Date dateCreated, Boolean hasTrophy, Boolean vipStatus, Boolean isReported) {
         this.id = id;
         this.ownerEmail = ownerEmail;
         this.title = title;
@@ -30,6 +31,7 @@ public class ThreadModel {
         this.dateCreated = dateCreated;
         this.hasTrophy = hasTrophy;
         this.vipStatus = vipStatus;
+        this.isReported = isReported;
     }
 
     public ThreadModel(ThreadModel threadModel) {
@@ -41,6 +43,7 @@ public class ThreadModel {
         this.dateCreated = threadModel.dateCreated;
         this.hasTrophy = threadModel.hasTrophy;
         this.vipStatus = threadModel.vipStatus;
+        this.isReported = threadModel.isReported;
     }
 
     public ThreadModel(Map<String, Object> map) {
@@ -51,6 +54,7 @@ public class ThreadModel {
         this.text = (String) map.getOrDefault("text", "no text");
         this.hasTrophy = (Boolean) map.getOrDefault("hasTrophy", false);
         this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
+        this.isReported = (Boolean) map.getOrDefault("isReported", false);
     }
 
     public String getId() {
@@ -109,6 +113,10 @@ public class ThreadModel {
 
     public void setVipStatus(Boolean vipStatus) { this.vipStatus = vipStatus; }
 
+    public Boolean getIsReported() { return isReported; }
+
+    public void setIsReported(Boolean reported) { isReported = reported; }
+
     public ThreadModel builderSetDateCreated(Timestamp dateCreated) {
         this.dateCreated = dateCreated.toDate();
         return this;
@@ -125,12 +133,13 @@ public class ThreadModel {
                 ", dateCreated=" + dateCreated +
                 ", hasTrophy=" + hasTrophy +
                 ", vipStatus=" + vipStatus +
+                ", isReported=" + isReported +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ownerEmail, title, category, text, dateCreated, hasTrophy, vipStatus);
+        return Objects.hash(id, ownerEmail, title, category, text, dateCreated, hasTrophy, vipStatus, isReported);
     }
 
     @Override
@@ -149,6 +158,7 @@ public class ThreadModel {
                 text.equals(threadModel.text) &&
                 dateCreated.equals(threadModel.dateCreated) &&
                 hasTrophy.equals(threadModel.hasTrophy) &&
+                isReported.equals(threadModel.isReported) &&
                 vipStatus.equals(threadModel.vipStatus);
     }
 
@@ -162,6 +172,7 @@ public class ThreadModel {
         map.put("text", text);
         map.put("hasTrophy", hasTrophy);
         map.put("vipStatus", vipStatus);
+        map.put("isReported", isReported);
 
         return map;
     }
@@ -183,6 +194,8 @@ public class ThreadModel {
             map.put("hasTrophy", hasTrophy);
         if (vipStatus != null || includeEmptyFields)
             map.put("vipStatus", vipStatus);
+        if (isReported != null || includeEmptyFields)
+            map.put("isReported", isReported);
 
         return map;
     }
