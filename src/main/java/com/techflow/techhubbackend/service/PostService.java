@@ -91,6 +91,16 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
 
         PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
+
+        //revoke user points if his/her post is deleted
+        UserModel userModel = new UserModel();
+        UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+        userModel.setTotalPoints(initialUserModel.getTotalPoints() - postModel.getUpvotes().size());
+        userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - postModel.getUpvotes().size());
+        if(postModel.isHasTrophy()){ userModel.setTrophies(initialUserModel.getTrophies() - 1); }
+        userService.updateUserDetails(postModel.getUserEmail(), userModel);
+
+        //update the other posts number
         Long postNumber = postModel.getPostNumber();
 
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereGreaterThan("postNumber", postNumber).get().get().getDocuments();
