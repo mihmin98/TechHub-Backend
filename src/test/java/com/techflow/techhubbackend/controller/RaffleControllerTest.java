@@ -78,6 +78,7 @@ public class RaffleControllerTest {
         user.setCurrentPoints(userTestDataProperties.getUserCurrentPoints());
         user.setTotalPoints(userTestDataProperties.getUserTotalPoints());
         user.setTrophies(userTestDataProperties.getUserTrophies());
+        user.setRafflesWon(userTestDataProperties.getUserRafflesWon());
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         dbFirestore.collection(USER_COLLECTION_NAME).document(user.getEmail()).set(user.generateMap()).get();

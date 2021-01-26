@@ -38,6 +38,9 @@ public class UserControllerTestDataProperties {
     @Value("${user.trophies}")
     private Integer userTrophies;
 
+    @Value("${user.rafflesWon}")
+    private Long userRafflesWon;
+
     @Value("${user.invalid.email}")
     private String userInvalidEmail;
 
@@ -151,6 +154,10 @@ public class UserControllerTestDataProperties {
 
     public void setUserTrophies(Integer userTrophies) {
         this.userTrophies = userTrophies;
+    }
+
+    public Long getUserRafflesWon() {
+        return userRafflesWon;
     }
 
     public String getUserInvalidEmail() {
