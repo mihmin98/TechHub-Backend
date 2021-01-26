@@ -8,15 +8,15 @@ public class DiscountModel {
     private String sellerEmail;
     private String title;
     private String description;
-    private ArrayList<String> pictures;
-    private int pointsCost;
+    private List<String> pictures;
+    private Integer pointsCost;
     private Boolean vipStatus;
     private Boolean isActive;
 
     public DiscountModel() {
     }
 
-    public DiscountModel(String id, String sellerEmail, String title, String description, ArrayList<String> pictures, int pointsCost, Boolean vipStatus, Boolean isActive) {
+    public DiscountModel(String id, String sellerEmail, String title, String description, List<String> pictures, Integer pointsCost, Boolean vipStatus, Boolean isActive) {
         this.id = id;
         this.sellerEmail = sellerEmail;
         this.title = title;
@@ -43,7 +43,7 @@ public class DiscountModel {
         this.sellerEmail = (String) map.getOrDefault("sellerEmail", "no seller email");
         this.title = (String) map.getOrDefault("title", "no title");
         this.description = (String) map.getOrDefault("description", "no seller description");
-        this.pictures = (ArrayList<String>) map.getOrDefault("pictures", new ArrayList<String>());
+        this.pictures = (List<String>) map.getOrDefault("pictures", new ArrayList<String>());
         this.pointsCost = ((Long) map.getOrDefault("pointsCost", 0)).intValue();
         this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
         this.isActive = (Boolean) map.getOrDefault("isActive", true);
@@ -53,7 +53,9 @@ public class DiscountModel {
         return id;
     }
 
-    public String getSellerEmail() { return sellerEmail; }
+    public String getSellerEmail() {
+        return sellerEmail;
+    }
 
     public String getTitle() {
         return title;
@@ -63,11 +65,11 @@ public class DiscountModel {
         return description;
     }
 
-    public ArrayList<String> getPictures() {
+    public List<String> getPictures() {
         return pictures;
     }
 
-    public int getPointsCost() {
+    public Integer getPointsCost() {
         return pointsCost;
     }
 
@@ -91,7 +93,7 @@ public class DiscountModel {
         this.pictures = pictures;
     }
 
-    public void setPointsCost(int pointsCost) {
+    public void setPointsCost(Integer pointsCost) {
         this.pointsCost = pointsCost;
     }
 
@@ -103,9 +105,13 @@ public class DiscountModel {
         this.vipStatus = vipStatus;
     }
 
-    public Boolean getActive() { return isActive; }
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-    public void setActive(Boolean active) { isActive = active; }
+    public void setIsActive(Boolean active) {
+        isActive = active;
+    }
 
     @Override
     public String toString() {
@@ -149,7 +155,7 @@ public class DiscountModel {
         map.put("title", title);
         map.put("description", description);
         if (pictures != null) {
-            map.put("pictures", Arrays.asList(pictures.toArray()));
+            map.put("pictures", pictures);
         }
         map.put("pointsCost", pointsCost);
         map.put("vipStatus", vipStatus);
@@ -169,16 +175,14 @@ public class DiscountModel {
             map.put("title", title);
         if (description != null || includeEmptyFields)
             map.put("description", description);
-        if (pictures != null || includeEmptyFields) {
-            map.put("pictures", Arrays.asList(pictures.toArray()));
-        }
-        map.put("pointsCost", pointsCost);
-        if (vipStatus != null || includeEmptyFields) {
+        if (pictures != null || includeEmptyFields)
+            map.put("pictures", pictures);
+        if (pointsCost != null || includeEmptyFields)
+            map.put("pointsCost", pointsCost);
+        if (vipStatus != null || includeEmptyFields)
             map.put("vipStatus", vipStatus);
-        }
-        if (isActive != null || includeEmptyFields) {
+        if (isActive != null || includeEmptyFields)
             map.put("isActive", isActive);
-        }
 
         return map;
     }
