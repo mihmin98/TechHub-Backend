@@ -151,9 +151,10 @@ public class RaffleService {
             DocumentSnapshot userDocumentSnapshot = userDocumentReference.get().get();
             long updatedCurrentPoints = raffle.getPrize() + Objects.requireNonNull(userDocumentSnapshot.getLong("currentPoints"));
             long updatedTotalPoints = raffle.getPrize() + Objects.requireNonNull(userDocumentSnapshot.getLong("totalPoints"));
+            long updatedRafflesWon = Objects.requireNonNull(userDocumentSnapshot.getLong("rafflesWon")) + 1;
 
             userDocumentReference.update("currentPoints", updatedCurrentPoints,
-                    "totalPoints", updatedTotalPoints).get();
+                    "totalPoints", updatedTotalPoints, "rafflesWon", updatedRafflesWon).get();
 
             // Create and schedule new raffle
             RaffleModel newRaffle = createNewRaffle();
