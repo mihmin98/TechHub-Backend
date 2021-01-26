@@ -75,7 +75,7 @@ public class UserModel implements Comparable<UserModel>{
             this.currentPoints = ((Long) map.getOrDefault("currentPoints", 0)).intValue();
             this.trophies = ((Long) map.getOrDefault("trophies", 0)).intValue();
             this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
-            this.rafflesWon = (Long) map.getOrDefault("rafflesWon", 0);
+            this.rafflesWon = (Long) map.getOrDefault("rafflesWon", 0L);
         }
     }
 
