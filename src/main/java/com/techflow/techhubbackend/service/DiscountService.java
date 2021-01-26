@@ -57,7 +57,7 @@ public class DiscountService {
     public String createDiscount(DiscountModel discountModel) throws ExecutionException, InterruptedException, JsonProcessingException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
         discountModel.setId(documentReference.getId());
-        discountModel.setActive(true);
+        discountModel.setIsActive(true);
         documentReference.set(discountModel.generateMap()).get();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -65,7 +65,6 @@ public class DiscountService {
         node.put("discountId", documentReference.getId());
 
         return mapper.writeValueAsString(node);
-
     }
 
     public void updateDiscount(String id, DiscountModel discountModel) throws ExecutionException, InterruptedException {
@@ -93,7 +92,7 @@ public class DiscountService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Discount not found");
 
         DiscountModel discountModel = new DiscountModel();
-        discountModel.setActive(false);
+        discountModel.setIsActive(false);
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(discountModel.generateMap(false)).get();
     }

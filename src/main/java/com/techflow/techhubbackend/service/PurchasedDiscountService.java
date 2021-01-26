@@ -73,7 +73,7 @@ public class PurchasedDiscountService {
         documentReference.set(purchasedDiscountModel.generateMap()).get();
 
         // Update user points
-        dbFirestore.collection(COL_NAME).document().update("currentPoints", userCurrentPoints - purchasedDiscountModel.getPointsSpent()).get();
+        dbFirestore.collection(COL_NAME).document(userEmail).update("currentPoints", userCurrentPoints - purchasedDiscountModel.getPointsSpent()).get();
 
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
