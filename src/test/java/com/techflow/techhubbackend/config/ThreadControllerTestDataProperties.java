@@ -29,11 +29,11 @@ public class ThreadControllerTestDataProperties {
     @Value("${thread.isReported}")
     private Boolean isReported;
 
-    @Value("${thread.put.text}")
-    private String threadPutText;
-
     @Value("${thread.isLocked}")
     private Boolean isLocked;
+
+    @Value("${thread.put.text}")
+    private String threadPutText;
     
     public ThreadControllerTestDataProperties() {
     }
