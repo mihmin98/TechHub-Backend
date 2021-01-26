@@ -14,16 +14,18 @@ public class PurchasedDiscountModel {
     private int pointsSpent;
     private String discountId;
     private Date datePurchased;
+    private String code;
 
     public PurchasedDiscountModel() {
     }
 
-    public PurchasedDiscountModel(String id, String purchaserEmail, int pointsSpent, String discountId, Date datePurchased) {
+    public PurchasedDiscountModel(String id, String purchaserEmail, int pointsSpent, String discountId, Date datePurchased, String code) {
         this.id = id;
         this.purchaserEmail = purchaserEmail;
         this.pointsSpent = pointsSpent;
         this.discountId = discountId;
         this.datePurchased = datePurchased;
+        this.code = code;
     }
 
     public PurchasedDiscountModel(PurchasedDiscountModel purchasedDiscountModel) {
@@ -32,6 +34,7 @@ public class PurchasedDiscountModel {
         this.pointsSpent = purchasedDiscountModel.pointsSpent;
         this.discountId = purchasedDiscountModel.discountId;
         this.datePurchased = purchasedDiscountModel.datePurchased;
+        this.code = purchasedDiscountModel.code;
     }
 
     public PurchasedDiscountModel(Map<String, Object> map) {
@@ -39,6 +42,7 @@ public class PurchasedDiscountModel {
         this.purchaserEmail = (String) map.getOrDefault("purchaserEmail", "no purchaser email");
         this.pointsSpent = ((Long) map.getOrDefault("pointsSpent", 0)).intValue();
         this.discountId = (String) map.getOrDefault("discountId", "no discount id");
+        this.code = (String) map.getOrDefault("code", "no code");
     }
 
     public String getId() {
@@ -86,6 +90,14 @@ public class PurchasedDiscountModel {
         return this;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     @Override
     public String toString() {
         return "PurchasedDiscountModel{" +
@@ -94,6 +106,7 @@ public class PurchasedDiscountModel {
                 ", pointsSpent=" + pointsSpent +
                 ", discountId='" + discountId + '\'' +
                 ", datePurchased=" + datePurchased +
+                ", code=" + code +
                 '}';
     }
 
@@ -106,12 +119,13 @@ public class PurchasedDiscountModel {
                 Objects.equals(id, that.id) &&
                 Objects.equals(purchaserEmail, that.purchaserEmail) &&
                 Objects.equals(discountId, that.discountId) &&
-                Objects.equals(datePurchased, that.datePurchased);
+                Objects.equals(datePurchased, that.datePurchased) &&
+                Objects.equals(code, that.code);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, purchaserEmail, pointsSpent, discountId, datePurchased);
+        return Objects.hash(id, purchaserEmail, pointsSpent, discountId, datePurchased, code);
     }
 
     public Map<String, Object> generateMap() {
@@ -121,7 +135,7 @@ public class PurchasedDiscountModel {
         map.put("purchaserEmail", purchaserEmail);
         map.put("pointsSpent", pointsSpent);
         map.put("discountId", discountId);
-
+        map.put("code", code);
         return map;
     }
 
@@ -135,7 +149,8 @@ public class PurchasedDiscountModel {
         map.put("pointsSpent", pointsSpent);
         if (discountId != null || includeEmptyFields)
             map.put("discountId", discountId);
-
+        if (code != null || includeEmptyFields)
+            map.put("code", code);
         return map;
     }
 }
