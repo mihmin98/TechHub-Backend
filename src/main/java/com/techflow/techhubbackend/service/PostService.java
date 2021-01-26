@@ -93,13 +93,23 @@ public class PostService {
 
         PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
 
+
         //revoke user points if his/her post is deleted
         UserModel userModel = new UserModel();
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         userModel.setType(UserType.REGULAR_USER);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() - postModel.getUpvotes().size());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - postModel.getUpvotes().size());
-        if(postModel.isHasTrophy()){ userModel.setTrophies(initialUserModel.getTrophies() - 1); }
+        if(postModel.isHasTrophy()){
+
+            //revoke trophy
+            userModel.setTrophies(initialUserModel.getTrophies() - 1);
+
+            //revoke hasTrophy status to thread
+            ThreadModel threadModel = new ThreadModel();
+            threadModel.setHasTrophy(false);
+            threadService.updateThread(postModel.getThreadId(), threadModel, true);
+        }
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         //update the other posts number
