@@ -281,6 +281,8 @@ public class DiscountControllerTest {
 
         dbFirestore.collection(DISCOUNTS_COLLECTION_NAME).document(discount.getId()).set(discount.generateMap()).get();
 
+        discountsToDelete.add(discount.getId());
+
         // Delete discount
         mockMvc.perform(delete("/discount/" + documentReference.getId())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
