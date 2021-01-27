@@ -23,7 +23,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -72,13 +71,26 @@ public class RaffleControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testRaffleModel = new RaffleModel(null, raffleTestDataProperties.getRafflePrize(), new ArrayList<>(), null, null, null, null);
-        UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
-        user.setType(UserType.REGULAR_USER);
-        user.setCurrentPoints(userTestDataProperties.getUserCurrentPoints());
-        user.setTotalPoints(userTestDataProperties.getUserTotalPoints());
-        user.setTrophies(userTestDataProperties.getUserTrophies());
-        user.setRafflesWon(userTestDataProperties.getUserRafflesWon());
+        testRaffleModel = new RaffleModel(null,
+                raffleTestDataProperties.getRafflePrize(),
+                new ArrayList<>(),
+                null,
+                null,
+                null,
+                null,
+                null);
+
+        UserModel user = new UserModel(userTestDataProperties.getUserEmail(),
+                userTestDataProperties.getUserPassword(),
+                userTestDataProperties.getUserUsername(),
+                UserType.REGULAR_USER,
+                userTestDataProperties.getUserProfilePicture(),
+                userTestDataProperties.getUserAccountStatus(),
+                userTestDataProperties.getUserTotalPoints(),
+                userTestDataProperties.getUserCurrentPoints(),
+                userTestDataProperties.getUserTrophies(),
+                false,
+                userTestDataProperties.getUserRafflesWon());
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         dbFirestore.collection(USER_COLLECTION_NAME).document(user.getEmail()).set(user.generateMap()).get();
@@ -136,6 +148,7 @@ public class RaffleControllerTest {
         assertEquals(raffle.getCreateTime(), receivedRaffle.getCreateTime());
         assertEquals(raffle.getDrawTime(), receivedRaffle.getDrawTime());
         assertEquals(raffle.getWinner(), receivedRaffle.getWinner());
+        assertEquals(raffle.getWinnerUsername(), receivedRaffle.getWinnerUsername());
         assertEquals(true, raffle.getActive());
     }
 
@@ -173,6 +186,7 @@ public class RaffleControllerTest {
         assertEquals(raffle.getCreateTime(), receivedRaffle.getCreateTime());
         assertEquals(raffle.getDrawTime(), receivedRaffle.getDrawTime());
         assertEquals(raffle.getWinner(), receivedRaffle.getWinner());
+        assertEquals(raffle.getWinnerUsername(), receivedRaffle.getWinnerUsername());
         assertEquals(false, raffle.getActive());
     }
 
@@ -215,6 +229,7 @@ public class RaffleControllerTest {
         assertEquals(raffle.getCreateTime(), receivedRaffle.getCreateTime());
         assertEquals(raffle.getDrawTime(), receivedRaffle.getDrawTime());
         assertEquals(raffle.getWinner(), receivedRaffle.getWinner());
+        assertEquals(raffle.getWinnerUsername(), receivedRaffle.getWinnerUsername());
         assertEquals(raffle.getActive(), raffle.getActive());
     }
 
@@ -351,6 +366,7 @@ public class RaffleControllerTest {
         assertFalse(Objects.requireNonNull(raffleDocumentSnapshot.getBoolean("isActive")));
         assertNotNull(raffleDocumentSnapshot.getString("winner"));
         assertEquals(userTestDataProperties.getUserEmail(), raffleDocumentSnapshot.getString("winner"));
+        assertEquals(userTestDataProperties.getUserUsername(), raffleDocumentSnapshot.getString("winnerUsername"));
 
         // Check that the user's points have been updated
         currentUserDocumentSnapshot = currentUserDocumentReference.get().get();
@@ -421,9 +437,11 @@ public class RaffleControllerTest {
 
         String winner = parentNode.path("winner").asText(null);
 
+        String winnerUsername = parentNode.path("winnerUsername").asText(null);
+
         Boolean isActive = parentNode.path("active").asBoolean();
 
-        return new RaffleModel(id, prize, entries, createTime, drawTime, winner, isActive);
+        return new RaffleModel(id, prize, entries, createTime, drawTime, winner, winnerUsername, isActive);
     }
 
     private List<RaffleModel> getListOfRafflesFromJSON(String json) throws JsonProcessingException {

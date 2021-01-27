@@ -143,18 +143,23 @@ public class RaffleService {
             List<String> entries = raffle.getEntries();
             String winner = entries.get(new Random().nextInt(entries.size()));
 
+            // Get winner document
+            DocumentReference userDocumentReference = dbFirestore.collection("user").document(winner);
+            DocumentSnapshot userDocumentSnapshot = userDocumentReference.get().get();
+
+            // Update finished raffle
             dbFirestore.collection(COLLECTION_NAME).document(raffle.getId()).update("winner", winner,
+                    "winnerUsername", userDocumentSnapshot.getString("username"),
                     "isActive", false).get();
 
             // Update winner points
-            DocumentReference userDocumentReference = dbFirestore.collection("user").document(winner);
-            DocumentSnapshot userDocumentSnapshot = userDocumentReference.get().get();
             long updatedCurrentPoints = raffle.getPrize() + Objects.requireNonNull(userDocumentSnapshot.getLong("currentPoints"));
             long updatedTotalPoints = raffle.getPrize() + Objects.requireNonNull(userDocumentSnapshot.getLong("totalPoints"));
             long updatedRafflesWon = Objects.requireNonNull(userDocumentSnapshot.getLong("rafflesWon")) + 1;
 
             userDocumentReference.update("currentPoints", updatedCurrentPoints,
-                    "totalPoints", updatedTotalPoints, "rafflesWon", updatedRafflesWon).get();
+                    "totalPoints", updatedTotalPoints,
+                    "rafflesWon", updatedRafflesWon).get();
 
             // Create and schedule new raffle
             RaffleModel newRaffle = createNewRaffle();
@@ -167,7 +172,7 @@ public class RaffleService {
     private RaffleModel createNewRaffle() throws ExecutionException, InterruptedException {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
 
-        RaffleModel newRaffle = new RaffleModel(documentReference.getId(), 0L, new ArrayList<>(), null, null, null, true);
+        RaffleModel newRaffle = new RaffleModel(documentReference.getId(), 0L, new ArrayList<>(), null, null, null, null, true);
 
         documentReference.set(newRaffle.generateMap()).get();
 

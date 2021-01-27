@@ -12,18 +12,20 @@ public class RaffleModel {
     private Timestamp createTime;
     private Timestamp drawTime;
     private String winner;
+    private String winnerUsername;
     private Boolean isActive;
 
     public RaffleModel() {
     }
 
-    public RaffleModel(String id, Long prize, List<String> entries, Timestamp createTime, Timestamp drawTime, String winner, Boolean isActive) {
+    public RaffleModel(String id, Long prize, List<String> entries, Timestamp createTime, Timestamp drawTime, String winner, String winnerUsername, Boolean isActive) {
         this.id = id;
         this.prize = prize;
         this.entries = entries;
         this.createTime = createTime;
         this.drawTime = drawTime;
         this.winner = winner;
+        this.winnerUsername = winnerUsername;
         this.isActive = isActive;
     }
 
@@ -34,6 +36,7 @@ public class RaffleModel {
         this.createTime = raffleModel.createTime;
         this.drawTime = raffleModel.drawTime;
         this.winner = raffleModel.winner;
+        this.winnerUsername = raffleModel.winnerUsername;
         this.isActive = raffleModel.isActive;
     }
 
@@ -44,6 +47,7 @@ public class RaffleModel {
         this.createTime = (Timestamp) map.getOrDefault("createTime", null);
         this.drawTime = (Timestamp) map.getOrDefault("drawTime", null);
         this.winner = (String) map.getOrDefault("winner", "no winner");
+        this.winnerUsername = (String) map.getOrDefault("winnerUsername", "no winner username");
         this.isActive = (Boolean) map.getOrDefault("isActive", false);
     }
 
@@ -95,6 +99,14 @@ public class RaffleModel {
         this.winner = winner;
     }
 
+    public String getWinnerUsername() {
+        return winnerUsername;
+    }
+
+    public void setWinnerUsername(String winnerUsername) {
+        this.winnerUsername = winnerUsername;
+    }
+
     public Boolean getActive() {
         return isActive;
     }
@@ -112,13 +124,14 @@ public class RaffleModel {
                 ", createTime='" + createTime + "'" +
                 ", drawTime='" + drawTime + "'" +
                 ", winner='" + winner + "'" +
+                ", winnerUsername='" + winnerUsername + "'" +
                 ", isActive='" + isActive + "'" +
                 "}";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, prize, entries, createTime, drawTime, winner, isActive);
+        return Objects.hash(id, prize, entries, createTime, drawTime, winner, winnerUsername, isActive);
     }
 
     @Override
@@ -136,6 +149,7 @@ public class RaffleModel {
                 createTime.equals(raffleModel.createTime) &&
                 drawTime.equals(raffleModel.drawTime) &&
                 winner.equals(raffleModel.winner) &&
+                winnerUsername.equals(raffleModel.winnerUsername) &&
                 isActive.equals(raffleModel.isActive);
     }
 
@@ -148,6 +162,7 @@ public class RaffleModel {
         map.put("createTime", createTime);
         map.put("drawTime", drawTime);
         map.put("winner", winner);
+        map.put("winnerUsername", winnerUsername);
         map.put("isActive", isActive);
 
         return map;
@@ -168,6 +183,8 @@ public class RaffleModel {
             map.put("drawTime", drawTime);
         if (winner != null || includeEmptyFields)
             map.put("winner", winner);
+        if (winnerUsername != null || includeEmptyFields)
+            map.put("winnerUsername", winnerUsername);
         if (isActive != null || includeEmptyFields)
             map.put("isActive", isActive);
 
