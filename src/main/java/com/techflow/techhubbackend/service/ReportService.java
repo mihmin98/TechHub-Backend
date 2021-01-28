@@ -1,5 +1,7 @@
 package com.techflow.techhubbackend.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -7,10 +9,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.techflow.techhubbackend.model.PostModel;
-import com.techflow.techhubbackend.model.ReportModel;
-import com.techflow.techhubbackend.model.ReportType;
-import com.techflow.techhubbackend.model.ThreadModel;
+import com.techflow.techhubbackend.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,8 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_TOKEN_PREFIX;
 
 @Service
 public class ReportService {
@@ -45,7 +46,12 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
-    public ReportModel getReport(String id) throws ExecutionException, InterruptedException {
+    public ReportModel getReport(String id, String jwt) throws ExecutionException, InterruptedException {
+
+        if (getUserTypeFromJwt(jwt) != UserType.MODERATOR) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only moderators can access this endpoint.");
+        }
+
         DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
         ReportModel reportModel;
@@ -58,7 +64,11 @@ public class ReportService {
         }
     }
 
-    public String createReport(ReportModel reportModel) throws ExecutionException, InterruptedException, JsonProcessingException {
+    public String createReport(ReportModel reportModel, String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
+
+        if (getUserTypeFromJwt(jwt) != UserType.REGULAR_USER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only regular users can access this endpoint.");
+        }
 
         validateReportedItem(reportModel);
 
@@ -91,7 +101,7 @@ public class ReportService {
         return mapper.writeValueAsString(node);
     }
 
-    public void updateReport(String id, ReportModel reportModel) throws ExecutionException, InterruptedException {
+    public void updateReport(String id, ReportModel reportModel, String jwt) throws ExecutionException, InterruptedException {
 
         DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
@@ -100,8 +110,8 @@ public class ReportService {
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(reportModel.generateMap(false)).get();
 
-        ReportModel initialReportModel = getReport(id);
-        List<ReportModel> allReportsForCurrentReportedItem = getReportsByReportedItemIdId(initialReportModel.getReportedItemId());
+        ReportModel initialReportModel = getReport(id, jwt);
+        List<ReportModel> allReportsForCurrentReportedItem = getReportsByReportedItemIdId(initialReportModel.getReportedItemId(), jwt);
         boolean allReportsHaveBeenSolved = true;
         for (ReportModel report : allReportsForCurrentReportedItem) {
             if (!report.getIsResolved()) {
@@ -142,19 +152,27 @@ public class ReportService {
         return reportTypes;
     }
 
-    public List<ReportModel> getSortedReportsByImportance() throws ExecutionException, InterruptedException {
+    public List<ReportModel> getSortedReportsByImportance(String jwt) throws ExecutionException, InterruptedException {
+
+        if (getUserTypeFromJwt(jwt) != UserType.MODERATOR) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only moderators can access this endpoint.");
+        }
 
         List<ReportModel> sortedReportsByImportance = new ArrayList<>();
 
         List<String> sortedReportedItemsIds = getSortedReportedItemsIds();
         for (String reportedItemId : sortedReportedItemsIds) {
-            sortedReportsByImportance.addAll(getReportsByReportedItemIdId(reportedItemId));
+            sortedReportsByImportance.addAll(getReportsByReportedItemIdId(reportedItemId, jwt));
         }
 
         return sortedReportsByImportance;
     }
 
-    public List<ReportModel> getReportsByReportedItemIdId(String reportedItemId) throws ExecutionException, InterruptedException {
+    public List<ReportModel> getReportsByReportedItemIdId(String reportedItemId, String jwt) throws ExecutionException, InterruptedException {
+
+        if (getUserTypeFromJwt(jwt) != UserType.MODERATOR) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only moderators can access this endpoint.");
+        }
 
         List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("reportedItemId", reportedItemId).get().get().getDocuments();
 
@@ -164,7 +182,21 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
-    public List<PostModel> getReportedPosts() throws ExecutionException, InterruptedException {
+    public List<ReportModel> getReportsByReportedItemIdIdUnauthorized(String reportedItemId) throws ExecutionException, InterruptedException {
+
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).whereEqualTo("reportedItemId", reportedItemId).get().get().getDocuments();
+
+        return documentSnapshots.stream()
+                .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
+                .map(mapTimestampEntry -> new ReportModel(mapTimestampEntry.getKey()).builderSetDateReported(mapTimestampEntry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<PostModel> getReportedPosts(String jwt) throws ExecutionException, InterruptedException {
+
+        if (getUserTypeFromJwt(jwt) != UserType.MODERATOR) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only moderators can access this endpoint.");
+        }
 
         List<PostModel> reportedPosts = new ArrayList<>();
 
@@ -180,7 +212,11 @@ public class ReportService {
         return reportedPosts;
     }
 
-    public List<ThreadModel> getReportedThreads() throws ExecutionException, InterruptedException {
+    public List<ThreadModel> getReportedThreads(String jwt) throws ExecutionException, InterruptedException {
+
+        if (getUserTypeFromJwt(jwt) != UserType.MODERATOR) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only moderators can access this endpoint.");
+        }
 
         List<ThreadModel> reportedThreads = new ArrayList<>();
 
@@ -244,5 +280,10 @@ public class ReportService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request. Thread id does not exist.");
             }
         }
+    }
+
+    private UserType getUserTypeFromJwt(String jwt) {
+        DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
+        return UserType.valueOf(decodedJWT.getClaim("userType").asString());
     }
 }
