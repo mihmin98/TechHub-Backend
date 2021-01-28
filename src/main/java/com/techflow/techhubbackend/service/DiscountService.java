@@ -10,6 +10,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.techflow.techhubbackend.model.UserType;
+import com.techflow.techhubbackend.model.DiscountModel;
 import com.techflow.techhubbackend.model.PurchasedDiscountModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
