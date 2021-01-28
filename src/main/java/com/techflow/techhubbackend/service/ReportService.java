@@ -65,16 +65,18 @@ public class ReportService {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
 
         reportModel.setId(documentReference.getId());
-        if(reportModel.getReportType() == null){ reportModel.setReportType(ReportType.OTHERS);}
-        if(reportModel.getIsResolved() == null){ reportModel.setIsResolved(false); }
+        if (reportModel.getReportType() == null) {
+            reportModel.setReportType(ReportType.OTHERS);
+        }
+        if (reportModel.getIsResolved() == null) {
+            reportModel.setIsResolved(false);
+        }
 
-        if(reportModel.getIsPostReport()){
+        if (reportModel.getIsPostReport()) {
             PostModel postModel = new PostModel();
             postModel.setIsReported(true);
             postService.updatePost(reportModel.getReportedItemId(), postModel);
-        }
-        else
-        {
+        } else {
             ThreadModel threadModel = new ThreadModel();
             threadModel.setIsReported(true);
             threadService.updateThread(reportModel.getReportedItemId(), threadModel, true);
@@ -97,6 +99,28 @@ public class ReportService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(reportModel.generateMap(false)).get();
+
+        ReportModel initialReportModel = getReport(id);
+        List<ReportModel> allReportsForCurrentReportedItem = getReportsByReportedItemIdId(initialReportModel.getReportedItemId());
+        boolean allReportsHaveBeenSolved = true;
+        for (ReportModel report : allReportsForCurrentReportedItem) {
+            if (!report.getIsResolved()) {
+                allReportsHaveBeenSolved = false;
+                break;
+            }
+        }
+
+        if (allReportsHaveBeenSolved) {
+            if (initialReportModel.getIsPostReport()) {
+                PostModel postModel = new PostModel();
+                postModel.setIsReported(false);
+                postService.updatePost(initialReportModel.getReportedItemId(), postModel);
+            } else {
+                ThreadModel threadModel = new ThreadModel();
+                threadModel.setIsReported(false);
+                threadService.updateThread(initialReportModel.getReportedItemId(), threadModel, true);
+            }
+        }
     }
 
     public void deleteReport(String id) throws ExecutionException, InterruptedException {
@@ -123,7 +147,7 @@ public class ReportService {
         List<ReportModel> sortedReportsByImportance = new ArrayList<>();
 
         List<String> sortedReportedItemsIds = getSortedReportedItemsIds();
-        for (String reportedItemId : sortedReportedItemsIds){
+        for (String reportedItemId : sortedReportedItemsIds) {
             sortedReportsByImportance.addAll(getReportsByReportedItemIdId(reportedItemId));
         }
 
@@ -145,9 +169,9 @@ public class ReportService {
         List<PostModel> reportedPosts = new ArrayList<>();
 
         List<String> reportedPostsIds = getReportedItemsIds();
-        for(String reportedPostId : reportedPostsIds){
+        for (String reportedPostId : reportedPostsIds) {
             DocumentSnapshot documentSnapshot = dbFirestore.collection(POST_COLLECTION_NAME).document(reportedPostId).get().get();
-            if (documentSnapshot.exists()){
+            if (documentSnapshot.exists()) {
                 PostModel postModel = postService.getPost(reportedPostId);
                 reportedPosts.add(postModel);
             }
@@ -161,9 +185,9 @@ public class ReportService {
         List<ThreadModel> reportedThreads = new ArrayList<>();
 
         List<String> reportedThreadsIds = getReportedItemsIds();
-        for(String reportedThreadId : reportedThreadsIds){
+        for (String reportedThreadId : reportedThreadsIds) {
             DocumentSnapshot documentSnapshot = dbFirestore.collection(THREAD_COLLECTION_NAME).document(reportedThreadId).get().get();
-            if (documentSnapshot.exists()){
+            if (documentSnapshot.exists()) {
                 ThreadModel threadModel = threadService.getThread(reportedThreadId, true);
                 reportedThreads.add(threadModel);
             }
@@ -197,7 +221,7 @@ public class ReportService {
             }
         }
 
-        Stream<Map.Entry<String,Integer>> sorted =
+        Stream<Map.Entry<String, Integer>> sorted =
                 reportedItemsMap.entrySet().stream()
                         .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()));
 

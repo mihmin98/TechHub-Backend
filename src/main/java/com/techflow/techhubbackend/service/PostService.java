@@ -9,10 +9,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.techflow.techhubbackend.model.PostModel;
-import com.techflow.techhubbackend.model.ThreadModel;
-import com.techflow.techhubbackend.model.UserModel;
-import com.techflow.techhubbackend.model.UserType;
+import com.techflow.techhubbackend.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -36,6 +33,9 @@ public class PostService {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    ReportService reportService;
 
     @Autowired
     private Firestore dbFirestore;
@@ -93,13 +93,23 @@ public class PostService {
 
         PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
 
+
         //revoke user points if his/her post is deleted
         UserModel userModel = new UserModel();
         UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
         userModel.setType(UserType.REGULAR_USER);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() - postModel.getUpvotes().size());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - postModel.getUpvotes().size());
-        if(postModel.isHasTrophy()){ userModel.setTrophies(initialUserModel.getTrophies() - 1); }
+        if(postModel.isHasTrophy()){
+
+            //revoke trophy
+            userModel.setTrophies(initialUserModel.getTrophies() - 1);
+
+            //revoke hasTrophy status to thread
+            ThreadModel threadModel = new ThreadModel();
+            threadModel.setHasTrophy(false);
+            threadService.updateThread(postModel.getThreadId(), threadModel, true);
+        }
         userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
         //update the other posts number
@@ -113,6 +123,12 @@ public class PostService {
         for (PostModel postToUpdate : postsToUpdate) {
             postToUpdate.setPostNumber(postToUpdate.getPostNumber() - 1);
             updatePost(postToUpdate.getId(), postToUpdate);
+        }
+
+        //delete all reports attached to the post
+        List<ReportModel> reportsAttachedToPost = reportService.getReportsByReportedItemIdId(postModel.getId());
+        for (ReportModel report : reportsAttachedToPost){
+            reportService.deleteReport(report.getId());
         }
 
         dbFirestore.collection(COLLECTION_NAME).document(id).delete().get();

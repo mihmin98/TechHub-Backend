@@ -259,6 +259,7 @@ public class UserControllerTest {
             toAdd.setEmail(toAdd.getEmail() + i);
             toAdd.setTotalPoints(testDataProperties.getUserSortPoints().get(i));
             toAdd.setTrophies(testDataProperties.getUserSortTrophies().get(i));
+            toAdd.setRafflesWon(testDataProperties.getUserRafflesWon());
 
             users.add(toAdd);
             usersToDelete.add(toAdd);

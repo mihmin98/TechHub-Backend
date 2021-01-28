@@ -29,9 +29,12 @@ public class ThreadControllerTestDataProperties {
     @Value("${thread.isReported}")
     private Boolean isReported;
 
+    @Value("${thread.isLocked}")
+    private Boolean isLocked;
+
     @Value("${thread.put.text}")
     private String threadPutText;
-
+    
     public ThreadControllerTestDataProperties() {
     }
 
@@ -86,4 +89,7 @@ public class ThreadControllerTestDataProperties {
     public Boolean getIsReported() { return isReported; }
 
     public void setIsReported(Boolean reported) { isReported = reported; }
+
+    public Boolean getIsLocked() { return isLocked;}
+    public void setIsLocked(Boolean isLocked) { this.isLocked = isLocked;}
 }

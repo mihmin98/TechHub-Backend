@@ -11,15 +11,14 @@ public class PurchasedDiscountModel {
 
     private String id;
     private String purchaserEmail;
-    private int pointsSpent;
+    private Integer pointsSpent;
     private String discountId;
     private Date datePurchased;
     private String code;
 
     public PurchasedDiscountModel() {
     }
-
-    public PurchasedDiscountModel(String id, String purchaserEmail, int pointsSpent, String discountId, Date datePurchased, String code) {
+    public PurchasedDiscountModel(String id, String purchaserEmail, Integer pointsSpent, String discountId, Date datePurchased, String code) {
         this.id = id;
         this.purchaserEmail = purchaserEmail;
         this.pointsSpent = pointsSpent;
@@ -53,7 +52,7 @@ public class PurchasedDiscountModel {
         return purchaserEmail;
     }
 
-    public int getPointsSpent() {
+    public Integer getPointsSpent() {
         return pointsSpent;
     }
 
@@ -73,7 +72,7 @@ public class PurchasedDiscountModel {
         this.purchaserEmail = purchaserEmail;
     }
 
-    public void setPointsSpent(int pointsSpent) {
+    public void setPointsSpent(Integer pointsSpent) {
         this.pointsSpent = pointsSpent;
     }
 
@@ -115,7 +114,7 @@ public class PurchasedDiscountModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PurchasedDiscountModel that = (PurchasedDiscountModel) o;
-        return pointsSpent == that.pointsSpent &&
+        return Objects.equals(pointsSpent, that.pointsSpent) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(purchaserEmail, that.purchaserEmail) &&
                 Objects.equals(discountId, that.discountId) &&
@@ -146,7 +145,8 @@ public class PurchasedDiscountModel {
             map.put("id", id);
         if (purchaserEmail != null || includeEmptyFields)
             map.put("purchaserEmail", purchaserEmail);
-        map.put("pointsSpent", pointsSpent);
+        if (pointsSpent != null || includeEmptyFields)
+            map.put("pointsSpent", pointsSpent);
         if (discountId != null || includeEmptyFields)
             map.put("discountId", discountId);
         if (code != null || includeEmptyFields)

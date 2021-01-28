@@ -76,9 +76,7 @@ public class ReportModel {
         return dateReported;
     }
 
-    public Boolean getIsResolved() {
-        return isResolved;
-    }
+    public Boolean getIsResolved() { return isResolved; }
 
     public Boolean getIsPostReport() { return isPostReport; }
 

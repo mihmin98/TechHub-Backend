@@ -77,7 +77,7 @@ public class ThreadControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testThreadModel = new ThreadModel(null, threadControllerTestDataProperties.getThreadOwnerEmail(), threadControllerTestDataProperties.getThreadTitle(), threadControllerTestDataProperties.getThreadCategory(), threadControllerTestDataProperties.getThreadText(), null, threadControllerTestDataProperties.getHasTrophy(), threadControllerTestDataProperties.getVipStatus(), threadControllerTestDataProperties.getIsReported());
+        testThreadModel = new ThreadModel(null, threadControllerTestDataProperties.getThreadOwnerEmail(), threadControllerTestDataProperties.getThreadTitle(), threadControllerTestDataProperties.getThreadCategory(), threadControllerTestDataProperties.getThreadText(), null, threadControllerTestDataProperties.getHasTrophy(), threadControllerTestDataProperties.getVipStatus(), threadControllerTestDataProperties.getIsReported(), threadControllerTestDataProperties.getIsLocked());
 
         // Create non-vip user
         UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
@@ -199,6 +199,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getHasTrophy(), getResult.getHasTrophy());
         assertEquals(thread.getVipStatus(), getResult.getVipStatus());
         assertEquals(thread.getIsReported(), getResult.getIsReported());
+        assertEquals(thread.getIsLocked(), getResult.getIsLocked());
         assertNotNull(getResult.getDateCreated());
     }
 
@@ -230,6 +231,7 @@ public class ThreadControllerTest {
         assertEquals(false, createdThread.getHasTrophy());
         assertEquals(false, createdThread.getVipStatus());
         assertEquals(false, createdThread.getIsReported());
+        assertEquals(false, createdThread.getIsLocked());
     }
 
     @Test
@@ -271,6 +273,7 @@ public class ThreadControllerTest {
         assertEquals(thread.getHasTrophy(), dbThread.getHasTrophy());
         assertEquals(thread.getVipStatus(), dbThread.getVipStatus());
         assertEquals(thread.getIsReported(), dbThread.getIsReported());
+        assertEquals(thread.getIsLocked(), dbThread.getIsLocked());
         assertEquals(threadControllerTestDataProperties.getThreadPutText(), dbThread.getText());
     }
 
