@@ -126,8 +126,7 @@ public class PostService {
         }
 
         //delete all reports attached to the post
-        List<ReportModel> reportsAttachedToPost = reportService.getReportsByReportedItemId(postModel.getId());
-
+        List<ReportModel> reportsAttachedToPost = reportService.getReportsByReportedItemIdId(postModel.getId());
         for (ReportModel report : reportsAttachedToPost){
             reportService.deleteReport(report.getId());
         }
