@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+
 import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_HEADER_STRING;
 
 @RestController
@@ -29,7 +32,9 @@ public class PurchasedDiscountController {
     }
 
     @PostMapping("")
-    public String createPurchasedDiscount(@RequestBody String discountId, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
+    public String createPurchasedDiscount(@RequestBody String discountId, @RequestHeader(AUTH_HEADER_STRING) String jwt)
+            throws ExecutionException, InterruptedException, JsonProcessingException, AddressException,
+            MessagingException {
         return purchasedDiscountService.createPurchasedDiscount(discountId, jwt);
     }
 

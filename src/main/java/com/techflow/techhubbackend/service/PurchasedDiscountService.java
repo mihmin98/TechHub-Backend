@@ -16,12 +16,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 
 import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_TOKEN_PREFIX;
 import static com.techflow.techhubbackend.service.UserService.COL_NAME;
@@ -56,9 +61,9 @@ public class PurchasedDiscountService {
         }
     }
 
-    public String createPurchasedDiscount(String discountId, String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
+    public String createPurchasedDiscount(String discountId, String jwt) throws ExecutionException, InterruptedException, JsonProcessingException, AddressException, MessagingException {
         String userEmail = getEmailFromJWT(jwt);
-
+        
         DocumentReference userDocumentReference = dbFirestore.collection(COL_NAME).document(userEmail);
         long userCurrentPoints = Objects.requireNonNull(userDocumentReference.get().get().getLong("currentPoints"));
 
@@ -69,7 +74,7 @@ public class PurchasedDiscountService {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User does not have enough points");
 
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
-        PurchasedDiscountModel purchasedDiscountModel = new PurchasedDiscountModel(documentReference.getId(), userEmail, discountModel.getPointsCost(), discountId, null);
+        PurchasedDiscountModel purchasedDiscountModel = new PurchasedDiscountModel(documentReference.getId(), userEmail, discountModel.getPointsCost(), discountId, null, generateRandomCode());
         documentReference.set(purchasedDiscountModel.generateMap()).get();
 
         // Update user points
@@ -78,6 +83,10 @@ public class PurchasedDiscountService {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
         node.put("purchasedDiscountModelId", documentReference.getId());
+
+        String code = purchasedDiscountModel.getCode();
+
+        new EmailService().sendMail(userEmail, code);
 
         return mapper.writeValueAsString(node);
     }
@@ -113,5 +122,38 @@ public class PurchasedDiscountService {
     private String getEmailFromJWT(String jwt) {
         DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
         return decodedJWT.getSubject();
+    }
+
+    private String generateRandomCode() throws InterruptedException, ExecutionException {
+
+        String lettersAndNumbers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                    + "0123456789"
+                                    + "abcdefghijklmnopqrstuvxyz"; 
+        StringBuilder code = new StringBuilder(20);
+        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).get().get().getDocuments();
+
+        List<PurchasedDiscountModel> purchasedDiscounts = documentSnapshots.stream()
+        .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
+        .map(mapTimestampEntry -> new PurchasedDiscountModel(mapTimestampEntry.getKey()).builderSetDatePurchased(mapTimestampEntry.getValue()))
+        .collect(Collectors.toList());
+
+        Boolean cond = true;
+        while(cond) {
+            code = new StringBuilder(20); 
+            cond = false;
+            for(int i = 0; i < 20; ++i) {
+                int ind = (int)(lettersAndNumbers.length() * Math.random());
+                code.append(lettersAndNumbers.charAt(ind));
+            }
+
+            for(var purchasedDiscount : purchasedDiscounts) {
+                if (purchasedDiscount.getCode().equals(code.toString())) {
+                    cond = true;
+                    break;
+                    }
+            }
+        }
+
+        return code.toString();
     }
 }
