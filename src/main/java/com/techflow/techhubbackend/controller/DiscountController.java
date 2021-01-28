@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_HEADER_STRING;
+
 @RestController
 @RequestMapping("/discount")
 public class DiscountController {
@@ -27,17 +29,17 @@ public class DiscountController {
     }
 
     @PostMapping("")
-    public String createDiscount(@RequestBody DiscountModel discountModel) throws ExecutionException, InterruptedException, JsonProcessingException {
-        return discountService.createDiscount(discountModel);
+    public String createDiscount(@RequestBody DiscountModel discountModel, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException, JsonProcessingException {
+        return discountService.createDiscount(discountModel, jwt);
     }
 
     @PutMapping("{id}")
-    public void updateDiscount(@PathVariable("id") String id, @RequestBody DiscountModel discountModel) throws ExecutionException, InterruptedException {
-        discountService.updateDiscount(id, discountModel);
+    public void updateDiscount(@PathVariable("id") String id, @RequestBody DiscountModel discountModel, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        discountService.updateDiscount(id, discountModel, jwt);
     }
 
     @DeleteMapping("{id}")
-    public void deleteDiscount(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
-        discountService.markDiscountAsInactive(id);
+    public void deleteDiscount(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
+        discountService.markDiscountAsInactive(id, jwt);
     }
 }
