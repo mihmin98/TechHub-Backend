@@ -54,8 +54,11 @@ public class ThreadController {
     }
 
     @GetMapping("{id}")
-    public ThreadModel getThread(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
-        return threadService.getThread(id, getUserVipStatus(jwt));
+    public ThreadModel getThread(@PathVariable("id") String id, @RequestHeader(value = AUTH_HEADER_STRING, required = false) String jwt) throws ExecutionException, InterruptedException {
+        if (jwt == null)
+            return threadService.getThread(id, false);
+        else
+            return threadService.getThread(id, getUserVipStatus(jwt));
     }
 
     @PostMapping("")
