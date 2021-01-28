@@ -77,6 +77,7 @@ public class PurchasedDiscountControllerTest {
                 purchasedDiscountTestDataProperties.getPurchasedDiscountPurchaserEmail(),
                 purchasedDiscountTestDataProperties.getPurchasedDiscountPointsSpent(),
                 null,
+                null,
                 null);
 
         testDiscountModel = new DiscountModel(null,
