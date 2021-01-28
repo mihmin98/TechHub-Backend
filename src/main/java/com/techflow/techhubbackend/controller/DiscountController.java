@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static com.techflow.techhubbackend.security.SecurityConstants.AUTH_HEADER_STRING;
+
 @RestController
 @RequestMapping("/discount")
 public class DiscountController {
@@ -39,5 +41,11 @@ public class DiscountController {
     @DeleteMapping("{id}")
     public void deleteDiscount(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
         discountService.markDiscountAsInactive(id);
+    }
+
+    @GetMapping("/search/{title}")
+    public List<DiscountModel> searchDiscounts(@PathVariable("title") String title, @RequestHeader(AUTH_HEADER_STRING) String jwt)
+            throws InterruptedException, ExecutionException {
+        return discountService.getDiscountsBySearch(title, jwt);
     }
 }
