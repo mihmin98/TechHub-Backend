@@ -77,7 +77,7 @@ public class DiscountControllerTest {
         UserModel user = new UserModel(userTestDataProperties.getUserEmail(),
                 userTestDataProperties.getUserPassword(),
                 userTestDataProperties.getUserUsername(),
-                UserType.REGULAR_USER,
+                UserType.MERCHANT,
                 userTestDataProperties.getUserProfilePicture(),
                 userTestDataProperties.getUserAccountStatus(),
                 userTestDataProperties.getUserTotalPoints(),
