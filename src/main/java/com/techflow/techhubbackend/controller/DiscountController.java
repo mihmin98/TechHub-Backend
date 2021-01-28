@@ -42,4 +42,10 @@ public class DiscountController {
     public void deleteDiscount(@PathVariable("id") String id, @RequestHeader(AUTH_HEADER_STRING) String jwt) throws ExecutionException, InterruptedException {
         discountService.markDiscountAsInactive(id, jwt);
     }
+
+    @GetMapping("/search/{title}")
+    public List<DiscountModel> searchDiscounts(@PathVariable("title") String title, @RequestHeader(AUTH_HEADER_STRING) String jwt)
+            throws InterruptedException, ExecutionException {
+        return discountService.getDiscountsBySearch(title, jwt);
+    }
 }
