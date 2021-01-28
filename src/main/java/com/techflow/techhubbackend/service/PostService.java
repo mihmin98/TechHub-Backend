@@ -126,7 +126,7 @@ public class PostService {
         }
 
         //delete all reports attached to the post
-        List<ReportModel> reportsAttachedToPost = reportService.getReportsByReportedItemIdId(postModel.getId());
+        List<ReportModel> reportsAttachedToPost = reportService.getReportsByReportedItemIdIdUnauthorized(postModel.getId());
         for (ReportModel report : reportsAttachedToPost){
             reportService.deleteReport(report.getId());
         }
@@ -184,6 +184,10 @@ public class PostService {
 
             userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
             userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
+
+            if (userModel.isVipStatus() != true && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
+                userModel.setVipStatus(true);
+
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
 
             dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
@@ -274,6 +278,10 @@ public class PostService {
             UserModel userModel = new UserModel();
             userModel.setType(initialUserModel.getType());
             userModel.setTrophies(initialUserModel.getTrophies() + 1);
+
+            if (userModel.isVipStatus() != true && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
+                userModel.setVipStatus(true);
+
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
         }
     }
