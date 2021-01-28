@@ -63,7 +63,7 @@ public class PurchasedDiscountService {
 
     public String createPurchasedDiscount(String discountId, String jwt) throws ExecutionException, InterruptedException, JsonProcessingException, AddressException, MessagingException {
         String userEmail = getEmailFromJWT(jwt);
-        
+
         DocumentReference userDocumentReference = dbFirestore.collection(COL_NAME).document(userEmail);
         long userCurrentPoints = Objects.requireNonNull(userDocumentReference.get().get().getLong("currentPoints"));
 
@@ -124,34 +124,15 @@ public class PurchasedDiscountService {
         return decodedJWT.getSubject();
     }
 
-    private String generateRandomCode() throws InterruptedException, ExecutionException {
-
+    private String generateRandomCode() {
         String lettersAndNumbers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                    + "0123456789"
-                                    + "abcdefghijklmnopqrstuvxyz"; 
+                + "0123456789"
+                + "abcdefghijklmnopqrstuvxyz";
         StringBuilder code = new StringBuilder(20);
-        List<QueryDocumentSnapshot> documentSnapshots = dbFirestore.collection(COLLECTION_NAME).get().get().getDocuments();
 
-        List<PurchasedDiscountModel> purchasedDiscounts = documentSnapshots.stream()
-        .map(queryDocumentSnapshot -> Map.entry(queryDocumentSnapshot.getData(), Objects.requireNonNull(queryDocumentSnapshot.getCreateTime())))
-        .map(mapTimestampEntry -> new PurchasedDiscountModel(mapTimestampEntry.getKey()).builderSetDatePurchased(mapTimestampEntry.getValue()))
-        .collect(Collectors.toList());
-
-        Boolean cond = true;
-        while(cond) {
-            code = new StringBuilder(20); 
-            cond = false;
-            for(int i = 0; i < 20; ++i) {
-                int ind = (int)(lettersAndNumbers.length() * Math.random());
-                code.append(lettersAndNumbers.charAt(ind));
-            }
-
-            for(var purchasedDiscount : purchasedDiscounts) {
-                if (purchasedDiscount.getCode().equals(code.toString())) {
-                    cond = true;
-                    break;
-                    }
-            }
+        for (int i = 0; i < 20; ++i) {
+            int ind = (int) (lettersAndNumbers.length() * Math.random());
+            code.append(lettersAndNumbers.charAt(ind));
         }
 
         return code.toString();
