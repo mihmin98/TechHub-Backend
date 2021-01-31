@@ -253,6 +253,15 @@ public class PostControllerTest {
         assertEquals(post.getUpvotes(), dbPost.getUpvotes());
         assertEquals(post.getDownvotes(), dbPost.getDownvotes());
         assertEquals(post.getIsReported(), dbPost.getIsReported());
+
+        // Try to update post that has an award
+        documentReference.update("hasTrophy", true).get();
+
+        mockMvc.perform(put("/post/" + documentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
+                .content(mapper.writeValueAsString(putPost))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -280,6 +289,15 @@ public class PostControllerTest {
         postDocumentReference.set(post.generateMap()).get();
 
         postsToDelete.add(postDocumentReference.getId());
+
+        // Try to delete post that has a trophy
+        postDocumentReference.update("hasTrophy", true).get();
+
+        mockMvc.perform(delete("/post/" + postDocumentReference.getId())
+                .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
+                .andExpect(status().isConflict());
+
+        postDocumentReference.update("hasTrophy", false).get();
 
         // DELETE post
         mockMvc.perform(delete("/post/" + postDocumentReference.getId())

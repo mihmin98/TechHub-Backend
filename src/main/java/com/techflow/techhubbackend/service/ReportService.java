@@ -86,7 +86,7 @@ public class ReportService {
         if (reportModel.getIsPostReport()) {
             PostModel postModel = new PostModel();
             postModel.setIsReported(true);
-            postService.updatePost(reportModel.getReportedItemId(), postModel);
+            postService.updatePost(reportModel.getReportedItemId(), postModel, UserType.NO_TYPE);
         } else {
             ThreadModel threadModel = new ThreadModel();
             threadModel.setIsReported(true);
@@ -125,7 +125,7 @@ public class ReportService {
             if (initialReportModel.getIsPostReport()) {
                 PostModel postModel = new PostModel();
                 postModel.setIsReported(false);
-                postService.updatePost(initialReportModel.getReportedItemId(), postModel);
+                postService.updatePost(initialReportModel.getReportedItemId(), postModel, UserType.NO_TYPE);
             } else {
                 ThreadModel threadModel = new ThreadModel();
                 threadModel.setIsReported(false);

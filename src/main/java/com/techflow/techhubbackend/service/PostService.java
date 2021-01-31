@@ -76,23 +76,28 @@ public class PostService {
         return mapper.writeValueAsString(node);
     }
 
-    public void updatePost(String id, PostModel postModel) throws ExecutionException, InterruptedException {
-        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+    public void updatePost(String id, PostModel postModel, UserType userType) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
-        if (!documentReference.exists())
+        if (!documentSnapshot.exists())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+
+        if (Objects.requireNonNull(documentSnapshot.getBoolean("hasTrophy")) && userType == UserType.REGULAR_USER)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User cannot edit a post with an award");
 
         dbFirestore.collection(COLLECTION_NAME).document(id).update(postModel.generateMap(false)).get();
     }
 
-    public void deletePost(String id) throws ExecutionException, InterruptedException {
-        DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
+    public void deletePost(String id, UserType userType) throws ExecutionException, InterruptedException {
+        DocumentSnapshot documentSnapshot = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
 
-        if (!documentReference.exists())
+        if (!documentSnapshot.exists())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
 
-        PostModel postModel = new PostModel(Objects.requireNonNull(documentReference.getData()));
+        if (Objects.requireNonNull(documentSnapshot.getBoolean("hasTrophy")) && userType == UserType.REGULAR_USER)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User cannot edit a post with an award");
 
+        PostModel postModel = new PostModel(Objects.requireNonNull(documentSnapshot.getData()));
 
         //revoke user points if his/her post is deleted
         UserModel userModel = new UserModel();
@@ -100,7 +105,7 @@ public class PostService {
         userModel.setType(UserType.REGULAR_USER);
         userModel.setTotalPoints(initialUserModel.getTotalPoints() - postModel.getUpvotes().size());
         userModel.setCurrentPoints(initialUserModel.getCurrentPoints() - postModel.getUpvotes().size());
-        if(postModel.isHasTrophy()){
+        if (postModel.isHasTrophy()) {
 
             //revoke trophy
             userModel.setTrophies(initialUserModel.getTrophies() - 1);
@@ -122,12 +127,12 @@ public class PostService {
                 .collect(Collectors.toList());
         for (PostModel postToUpdate : postsToUpdate) {
             postToUpdate.setPostNumber(postToUpdate.getPostNumber() - 1);
-            updatePost(postToUpdate.getId(), postToUpdate);
+            updatePost(postToUpdate.getId(), postToUpdate, UserType.NO_TYPE);
         }
 
         //delete all reports attached to the post
         List<ReportModel> reportsAttachedToPost = reportService.getReportsByReportedItemIdIdUnauthorized(postModel.getId());
-        for (ReportModel report : reportsAttachedToPost){
+        for (ReportModel report : reportsAttachedToPost) {
             reportService.deleteReport(report.getId());
         }
 
@@ -185,7 +190,7 @@ public class PostService {
             userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
             userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
 
-            if (userModel.isVipStatus() != true && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
+            if (!userModel.isVipStatus() && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
                 userModel.setVipStatus(true);
 
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
@@ -269,7 +274,7 @@ public class PostService {
 
         if (!postModel.isHasTrophy() && !threadModel.getHasTrophy()) {
             postModel.setHasTrophy(true);
-            updatePost(id, postModel);
+            updatePost(id, postModel, UserType.NO_TYPE);
 
             threadModel.setHasTrophy(true);
             threadService.updateThread(postModel.getThreadId(), threadModel, threadModel.getVipStatus());
@@ -279,7 +284,7 @@ public class PostService {
             userModel.setType(initialUserModel.getType());
             userModel.setTrophies(initialUserModel.getTrophies() + 1);
 
-            if (userModel.isVipStatus() != true && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
+            if (!userModel.isVipStatus() && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
                 userModel.setVipStatus(true);
 
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
