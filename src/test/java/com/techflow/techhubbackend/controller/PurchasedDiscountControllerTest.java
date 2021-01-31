@@ -237,6 +237,7 @@ public class PurchasedDiscountControllerTest {
                 .getContentAsString();
 
         String purchasedDiscountId = (String) mapper.readValue(purchasedDiscountIdJson, HashMap.class).get("purchasedDiscountModelId");
+        purchasedDiscountsToDelete.add(purchasedDiscountId);
 
         // Check if the user points have been updated
         long updatedUserPoints = Objects.requireNonNull(dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail()).get().get().getLong("currentPoints"));
