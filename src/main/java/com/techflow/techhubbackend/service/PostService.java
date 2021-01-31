@@ -175,6 +175,10 @@ public class PostService {
 
         if (!upvotes.contains(userEmail)) {
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+
+            if (initialUserModel.getType() == UserType.MODERATOR)
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Moderators can't be upvoted");
+
             UserModel userModel = new UserModel();
             userModel.setType(initialUserModel.getType());
 
@@ -206,6 +210,10 @@ public class PostService {
 
         if (!downvotes.contains(userEmail)) {
             UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+
+            if (initialUserModel.getType() == UserType.MODERATOR)
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Moderators can't be downvoted");
+
             UserModel userModel = new UserModel();
             userModel.setType(initialUserModel.getType());
 
@@ -273,13 +281,17 @@ public class PostService {
         ThreadModel threadModel = new ThreadModel(threadService.getThread(postModel.getThreadId(), vipStatus));
 
         if (!postModel.isHasTrophy() && !threadModel.getHasTrophy()) {
+            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
+
+            if (initialUserModel.getType() == UserType.MODERATOR)
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Moderators can't be awarded trophies");
+
             postModel.setHasTrophy(true);
             updatePost(id, postModel, UserType.NO_TYPE);
 
             threadModel.setHasTrophy(true);
             threadService.updateThread(postModel.getThreadId(), threadModel, threadModel.getVipStatus());
 
-            UserModel initialUserModel = userService.getUserDetails(postModel.getUserEmail());
             UserModel userModel = new UserModel();
             userModel.setType(initialUserModel.getType());
             userModel.setTrophies(initialUserModel.getTrophies() + 1);
