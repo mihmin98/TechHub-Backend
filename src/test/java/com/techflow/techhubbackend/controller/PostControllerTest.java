@@ -68,12 +68,28 @@ public class PostControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testPostModel = new PostModel(null, postControllerTestDataProperties.getPostUserEmail(), null, null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes(), postControllerTestDataProperties.getIsReported());
-        UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
-        user.setType(UserType.REGULAR_USER);
-        user.setCurrentPoints(userTestDataProperties.getUserCurrentPoints());
-        user.setTotalPoints(userTestDataProperties.getUserTotalPoints());
-        user.setTrophies(userTestDataProperties.getUserTrophies());
+        testPostModel = new PostModel(null,
+                postControllerTestDataProperties.getPostUserEmail(),
+                null,
+                null,
+                postControllerTestDataProperties.getPostText(),
+                null,
+                postControllerTestDataProperties.getPostHasTrophy(),
+                postControllerTestDataProperties.getUpvotes(),
+                postControllerTestDataProperties.getDownvotes(),
+                postControllerTestDataProperties.getIsReported());
+
+        UserModel user = new UserModel(userTestDataProperties.getUserEmail(),
+                userTestDataProperties.getUserPassword(),
+                userTestDataProperties.getUserUsername(),
+                UserType.REGULAR_USER,
+                userTestDataProperties.getUserProfilePicture(),
+                userTestDataProperties.getUserAccountStatus(),
+                userTestDataProperties.getUserTotalPoints(),
+                userTestDataProperties.getUserCurrentPoints(),
+                userTestDataProperties.getUserTrophies(),
+                false,
+                userTestDataProperties.getUserRafflesWon());
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         dbFirestore.collection(USER_COLLECTION_NAME).document(user.getEmail()).set(user.generateMap()).get();
