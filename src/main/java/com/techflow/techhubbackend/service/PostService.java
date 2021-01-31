@@ -194,7 +194,7 @@ public class PostService {
             userModel.setCurrentPoints(initialUserModel.getCurrentPoints() + 1);
             userModel.setTotalPoints(initialUserModel.getTotalPoints() + 1);
 
-            if (!userModel.isVipStatus() && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
+            if (!initialUserModel.isVipStatus() && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
                 userModel.setVipStatus(true);
 
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
@@ -296,7 +296,7 @@ public class PostService {
             userModel.setType(initialUserModel.getType());
             userModel.setTrophies(initialUserModel.getTrophies() + 1);
 
-            if (!userModel.isVipStatus() && ((userModel.getTotalPoints() + userModel.getTrophies() * 10) >= 1000))
+            if (!initialUserModel.isVipStatus() && ((initialUserModel.getTotalPoints() + initialUserModel.getTrophies() * 10) >= 1000))
                 userModel.setVipStatus(true);
 
             userService.updateUserDetails(postModel.getUserEmail(), userModel);
