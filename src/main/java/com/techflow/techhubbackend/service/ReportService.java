@@ -75,6 +75,7 @@ public class ReportService {
         DocumentReference documentReference = dbFirestore.collection(COLLECTION_NAME).document();
 
         reportModel.setId(documentReference.getId());
+        reportModel.setReporterId(getEmailFromJwt(jwt));
         if (reportModel.getReportType() == null) {
             reportModel.setReportType(ReportType.OTHERS);
         }
@@ -285,5 +286,10 @@ public class ReportService {
     private UserType getUserTypeFromJwt(String jwt) {
         DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
         return UserType.valueOf(decodedJWT.getClaim("userType").asString());
+    }
+
+    private String getEmailFromJwt(String jwt) {
+        DecodedJWT decodedJWT = JWT.decode(jwt.replace(AUTH_TOKEN_PREFIX, ""));
+        return decodedJWT.getSubject();
     }
 }
