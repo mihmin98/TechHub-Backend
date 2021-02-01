@@ -107,8 +107,8 @@ public class DiscountService {
 
     public void markDiscountAsInactive(String id, String jwt) throws ExecutionException, InterruptedException {
 
-        if (getUserTypeFromJwt(jwt) != UserType.MERCHANT) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only merchants can access this endpoint.");
+        if (getUserTypeFromJwt(jwt) == UserType.REGULAR_USER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Regular users can't access this endpoint.");
         }
 
         DocumentSnapshot documentReference = dbFirestore.collection(COLLECTION_NAME).document(id).get().get();
@@ -154,7 +154,7 @@ public class DiscountService {
         for (var discount : allDiscounts) {
             if (discount.getTitle() == null)
                 continue;
-            if (discount.getIsActive() != true)
+            if (!discount.getIsActive())
                 continue;
             if(streamedIds.contains(discount.getId()))
                 continue;
