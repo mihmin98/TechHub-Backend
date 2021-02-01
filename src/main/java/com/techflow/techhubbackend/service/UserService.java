@@ -48,6 +48,14 @@ public class UserService implements UserDetailsService {
         if (encodePassword)
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
+        if(user.getType()==UserType.REGULAR_USER){
+            user.setTrophies(0L);
+            user.setTotalPoints(0L);
+            user.setCurrentPoints(0L);
+            user.setRafflesWon(0L);
+            user.setVipStatus(false);
+        }
+
         dbFirestore.collection(COL_NAME).document(user.getEmail()).set(user.generateMap()).get();
     }
 
