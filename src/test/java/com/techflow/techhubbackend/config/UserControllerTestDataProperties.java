@@ -30,13 +30,13 @@ public class UserControllerTestDataProperties {
     private String userAccountStatus;
 
     @Value("${user.currentPoints}")
-    private Integer userCurrentPoints;
+    private Long userCurrentPoints;
 
     @Value("${user.totalPoints}")
-    private Integer userTotalPoints;
+    private Long userTotalPoints;
 
     @Value("${user.trophies}")
-    private Integer userTrophies;
+    private Long userTrophies;
 
     @Value("${user.rafflesWon}")
     private Long userRafflesWon;
@@ -63,10 +63,10 @@ public class UserControllerTestDataProperties {
     private String userPutChangedPassword;
 
     @Value("#{${user.sort.points}}")
-    private List<Integer> userSortPoints;
+    private List<Long> userSortPoints;
 
     @Value("#{${user.sort.trophies}}")
-    private List<Integer> userSortTrophies;
+    private List<Long> userSortTrophies;
 
     @Value("${user.vip.email}")
     private String userVipEmail;
@@ -132,27 +132,27 @@ public class UserControllerTestDataProperties {
         this.userAccountStatus = userAccountStatus;
     }
 
-    public Integer getUserCurrentPoints() {
+    public Long getUserCurrentPoints() {
         return userCurrentPoints;
     }
 
-    public void setUserCurrentPoints(Integer userCurrentPoints) {
+    public void setUserCurrentPoints(Long userCurrentPoints) {
         this.userCurrentPoints = userCurrentPoints;
     }
 
-    public Integer getUserTotalPoints() {
+    public Long getUserTotalPoints() {
         return userTotalPoints;
     }
 
-    public void setUserTotalPoints(Integer userTotalPoints) {
+    public void setUserTotalPoints(Long userTotalPoints) {
         this.userTotalPoints = userTotalPoints;
     }
 
-    public Integer getUserTrophies() {
+    public Long getUserTrophies() {
         return userTrophies;
     }
 
-    public void setUserTrophies(Integer userTrophies) {
+    public void setUserTrophies(Long userTrophies) {
         this.userTrophies = userTrophies;
     }
 
@@ -216,19 +216,19 @@ public class UserControllerTestDataProperties {
         this.userPutChangedPassword = userPutChangedPassword;
     }
 
-    public List<Integer> getUserSortPoints() {
+    public List<Long> getUserSortPoints() {
         return userSortPoints;
     }
 
-    public void setUserSortPoints(List<Integer> userSortPoints) {
+    public void setUserSortPoints(List<Long> userSortPoints) {
         this.userSortPoints = userSortPoints;
     }
 
-    public List<Integer> getUserSortTrophies() {
+    public List<Long> getUserSortTrophies() {
         return userSortTrophies;
     }
 
-    public void setUserSortTrophies(List<Integer> userSortTrophies) {
+    public void setUserSortTrophies(List<Long> userSortTrophies) {
         this.userSortTrophies = userSortTrophies;
     }
 

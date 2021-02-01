@@ -68,12 +68,28 @@ public class PostControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testPostModel = new PostModel(null, postControllerTestDataProperties.getPostUserEmail(), null, null, postControllerTestDataProperties.getPostText(), null, postControllerTestDataProperties.getPostHasTrophy(), postControllerTestDataProperties.getUpvotes(), postControllerTestDataProperties.getDownvotes(), postControllerTestDataProperties.getIsReported());
-        UserModel user = new UserModel(userTestDataProperties.getUserEmail(), userTestDataProperties.getUserPassword(), userTestDataProperties.getUserUsername(), userTestDataProperties.getUserType(), userTestDataProperties.getUserProfilePicture(), userTestDataProperties.getUserAccountStatus());
-        user.setType(UserType.REGULAR_USER);
-        user.setCurrentPoints(userTestDataProperties.getUserCurrentPoints());
-        user.setTotalPoints(userTestDataProperties.getUserTotalPoints());
-        user.setTrophies(userTestDataProperties.getUserTrophies());
+        testPostModel = new PostModel(null,
+                postControllerTestDataProperties.getPostUserEmail(),
+                null,
+                null,
+                postControllerTestDataProperties.getPostText(),
+                null,
+                postControllerTestDataProperties.getPostHasTrophy(),
+                postControllerTestDataProperties.getUpvotes(),
+                postControllerTestDataProperties.getDownvotes(),
+                postControllerTestDataProperties.getIsReported());
+
+        UserModel user = new UserModel(userTestDataProperties.getUserEmail(),
+                userTestDataProperties.getUserPassword(),
+                userTestDataProperties.getUserUsername(),
+                UserType.REGULAR_USER,
+                userTestDataProperties.getUserProfilePicture(),
+                userTestDataProperties.getUserAccountStatus(),
+                userTestDataProperties.getUserTotalPoints(),
+                userTestDataProperties.getUserCurrentPoints(),
+                userTestDataProperties.getUserTrophies(),
+                false,
+                userTestDataProperties.getUserRafflesWon());
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         dbFirestore.collection(USER_COLLECTION_NAME).document(user.getEmail()).set(user.generateMap()).get();
@@ -408,6 +424,12 @@ public class PostControllerTest {
 
         // Get current user
         DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+
+        // Set current user points just below the threshold of becoming a vip
+        currentUserDocumentReference.update("vipStatus", false,
+                "currentPoints", 999,
+                "totalPoints", 999).get();
+
         UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
 
         // Upvote the post
@@ -425,6 +447,10 @@ public class PostControllerTest {
 
         assertEquals(currentUser.getCurrentPoints() + 1, updatedCurrentPoints.intValue());
         assertEquals(currentUser.getTotalPoints() + 1, updatedTotalPoints.intValue());
+
+        // Check that the user is now a vip
+        Boolean updatedVipStatus = Objects.requireNonNull(currentUserDocumentReference.get().get().getBoolean("vipStatus"));
+        assertTrue(updatedVipStatus);
 
         // Upvote again and check if the number of upvotes has changed
         mockMvc.perform(put("/post/" + post.getId() + "/upvote")
@@ -683,6 +709,13 @@ public class PostControllerTest {
 
         // Get current user
         DocumentReference currentUserDocumentReference = dbFirestore.collection(USER_COLLECTION_NAME).document(userTestDataProperties.getUserEmail());
+
+        // Set current user points just below the threshold of becoming a vip
+        currentUserDocumentReference.update("vipStatus", false,
+                "currentPoints", 999,
+                "totalPoints", 999,
+                "trophies", 0).get();
+
         UserModel currentUser = new UserModel(Objects.requireNonNull(currentUserDocumentReference.get().get().getData()));
 
         // Award thread
@@ -699,6 +732,10 @@ public class PostControllerTest {
         // Check the user's trophies
         Long updatedUserTrophies = currentUserDocumentReference.get().get().getLong("trophies");
         assertEquals(currentUser.getTrophies() + 1, updatedUserTrophies);
+
+        // Check that the user is now a vip
+        Boolean updatedVipStatus = Objects.requireNonNull(currentUserDocumentReference.get().get().getBoolean("vipStatus"));
+        assertTrue(updatedVipStatus);
 
         // Try to award again
         mockMvc.perform(put("/post/" + documentReference.getId() + "/awardTrophy")

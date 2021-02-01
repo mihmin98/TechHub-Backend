@@ -1,6 +1,8 @@
 package com.techflow.techhubbackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -37,7 +39,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserControllerTestDataProperties testDataProperties;
+    private UserControllerTestDataProperties userTestDataProperties;
 
     @Autowired
     private Firestore dbFirestore;
@@ -55,11 +57,21 @@ public class UserControllerTest {
 
     @BeforeAll
     void login() throws Exception {
-        testUser = new UserModel(testDataProperties.getUserEmail(), testDataProperties.getUserPassword(), testDataProperties.getUserUsername(), testDataProperties.getUserType(), testDataProperties.getUserProfilePicture(), testDataProperties.getUserAccountStatus());
+        testUser = new UserModel(userTestDataProperties.getUserEmail(),
+                userTestDataProperties.getUserPassword(),
+                userTestDataProperties.getUserUsername(),
+                UserType.REGULAR_USER,
+                userTestDataProperties.getUserProfilePicture(),
+                userTestDataProperties.getUserAccountStatus(),
+                userTestDataProperties.getUserTotalPoints(),
+                userTestDataProperties.getUserCurrentPoints(),
+                userTestDataProperties.getUserTrophies(),
+                false,
+                userTestDataProperties.getUserRafflesWon());
 
         testUser.setPassword(bCryptPasswordEncoder.encode(testUser.getPassword()));
         dbFirestore.collection(COLLECTION_NAME).document(testUser.getEmail()).set(testUser.generateMap()).get();
-        testUser.setPassword(testDataProperties.getUserPassword());
+        testUser.setPassword(userTestDataProperties.getUserPassword());
 
         // Login
         ObjectMapper mapper = new ObjectMapper();
@@ -81,9 +93,9 @@ public class UserControllerTest {
 
     @Test
     void getUser() throws Exception {
-        dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserInvalidEmail()).delete().get();
+        dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserInvalidEmail()).delete().get();
 
-        mockMvc.perform(get("/user/" + testDataProperties.getUserInvalidEmail())
+        mockMvc.perform(get("/user/" + userTestDataProperties.getUserInvalidEmail())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
@@ -95,7 +107,7 @@ public class UserControllerTest {
                 .getContentAsString();
 
         ObjectMapper mapper = new ObjectMapper();
-        UserModel getResult = new UserModel((HashMap<String, Object>) mapper.readValue(userJson, HashMap.class));
+        UserModel getResult = getUserFromJSON(userJson);
 
         assertEquals(testUser.getEmail(), getResult.getEmail());
         assertEquals(testUser.getUsername(), getResult.getUsername());
@@ -103,12 +115,17 @@ public class UserControllerTest {
         assertEquals(testUser.getType(), getResult.getType());
         assertEquals(testUser.getProfilePicture(), getResult.getProfilePicture());
         assertEquals(testUser.getAccountStatus(), getResult.getAccountStatus());
+        assertEquals(testUser.getTotalPoints(), getResult.getTotalPoints());
+        assertEquals(testUser.getCurrentPoints(), getResult.getCurrentPoints());
+        assertEquals(testUser.getTrophies(), getResult.getTrophies());
+        assertEquals(testUser.isVipStatus(), getResult.isVipStatus());
+        assertEquals(testUser.getRafflesWon(), getResult.getRafflesWon());
     }
 
     @Test
     void postUser() throws Exception {
         UserModel postUser = new UserModel(testUser);
-        postUser.setEmail(testDataProperties.getUserPostEmail());
+        postUser.setEmail(userTestDataProperties.getUserPostEmail());
 
         // Make sure user does not exist
         dbFirestore.collection(COLLECTION_NAME).document(postUser.getEmail()).delete().get();
@@ -141,15 +158,15 @@ public class UserControllerTest {
     @Test
     void deleteUser() throws Exception {
         // Try to delete user that does not exist
-        dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserInvalidEmail()).delete().get();
+        dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserInvalidEmail()).delete().get();
 
-        mockMvc.perform(delete("/user/" + testDataProperties.getUserInvalidEmail())
+        mockMvc.perform(delete("/user/" + userTestDataProperties.getUserInvalidEmail())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt))
                 .andExpect(status().isNotFound());
 
         // Create user then delete him
         UserModel deleteUser = new UserModel(testUser);
-        deleteUser.setEmail(testDataProperties.getUserDeleteEmail());
+        deleteUser.setEmail(userTestDataProperties.getUserDeleteEmail());
         dbFirestore.collection(COLLECTION_NAME).document(deleteUser.getEmail()).set(deleteUser.generateMap()).get();
 
         mockMvc.perform(delete("/user/" + deleteUser.getEmail())
@@ -164,10 +181,10 @@ public class UserControllerTest {
     @Test
     void putUser() throws Exception {
         // Delete invalid user
-        dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserInvalidEmail()).delete().get();
+        dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserInvalidEmail()).delete().get();
 
         // Try to PUT on non existing user
-        mockMvc.perform(put("/user/" + testDataProperties.getUserInvalidEmail())
+        mockMvc.perform(put("/user/" + userTestDataProperties.getUserInvalidEmail())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content("{}")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -175,80 +192,80 @@ public class UserControllerTest {
 
         // Create PUT user
         UserModel putUser = new UserModel(testUser);
-        putUser.setEmail(testDataProperties.getUserPutInitialEmail());
+        putUser.setEmail(userTestDataProperties.getUserPutInitialEmail());
         putUser.setPassword(bCryptPasswordEncoder.encode(putUser.getPassword()));
 
         dbFirestore.collection(COLLECTION_NAME).document(putUser.getEmail()).set(putUser.generateMap()).get();
 
         // Try to update a field
         putUser = new UserModel();
-        putUser.setAccountStatus(testDataProperties.getUserPutChangedAccountStatus());
+        putUser.setAccountStatus(userTestDataProperties.getUserPutChangedAccountStatus());
         ObjectMapper mapper = new ObjectMapper();
 
-        mockMvc.perform(put("/user/" + testDataProperties.getUserPutInitialEmail())
+        mockMvc.perform(put("/user/" + userTestDataProperties.getUserPutInitialEmail())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putUser))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        DocumentSnapshot document = dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutInitialEmail()).get().get();
+        DocumentSnapshot document = dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPutInitialEmail()).get().get();
         UserModel dbUser = new UserModel(Objects.requireNonNull(document.getData()));
 
-        assertEquals(testDataProperties.getUserPutInitialEmail(), dbUser.getEmail());
+        assertEquals(userTestDataProperties.getUserPutInitialEmail(), dbUser.getEmail());
         assertEquals(testUser.getUsername(), dbUser.getUsername());
-        assertTrue(bCryptPasswordEncoder.matches(testDataProperties.getUserPassword(), dbUser.getPassword()));
+        assertTrue(bCryptPasswordEncoder.matches(userTestDataProperties.getUserPassword(), dbUser.getPassword()));
         assertEquals(testUser.getType(), dbUser.getType());
         assertEquals(testUser.getProfilePicture(), dbUser.getProfilePicture());
         assertEquals(putUser.getAccountStatus(), dbUser.getAccountStatus());
 
         // Try to update password
         putUser = new UserModel();
-        putUser.setPassword(testDataProperties.getUserPutChangedPassword());
+        putUser.setPassword(userTestDataProperties.getUserPutChangedPassword());
 
-        mockMvc.perform(put("/user/" + testDataProperties.getUserPutInitialEmail())
+        mockMvc.perform(put("/user/" + userTestDataProperties.getUserPutInitialEmail())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putUser))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        document = dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutInitialEmail()).get().get();
+        document = dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPutInitialEmail()).get().get();
         dbUser = new UserModel(Objects.requireNonNull(document.getData()));
 
-        assertEquals(testDataProperties.getUserPutInitialEmail(), dbUser.getEmail());
+        assertEquals(userTestDataProperties.getUserPutInitialEmail(), dbUser.getEmail());
         assertEquals(testUser.getUsername(), dbUser.getUsername());
-        assertTrue(bCryptPasswordEncoder.matches(testDataProperties.getUserPutChangedPassword(), dbUser.getPassword()));
+        assertTrue(bCryptPasswordEncoder.matches(userTestDataProperties.getUserPutChangedPassword(), dbUser.getPassword()));
         assertEquals(testUser.getType(), dbUser.getType());
         assertEquals(testUser.getProfilePicture(), dbUser.getProfilePicture());
-        assertEquals(testDataProperties.getUserPutChangedAccountStatus(), dbUser.getAccountStatus());
+        assertEquals(userTestDataProperties.getUserPutChangedAccountStatus(), dbUser.getAccountStatus());
 
         // Try to change email
         putUser = new UserModel();
-        putUser.setEmail(testDataProperties.getUserPutChangedEmail());
+        putUser.setEmail(userTestDataProperties.getUserPutChangedEmail());
 
-        mockMvc.perform(put("/user/" + testDataProperties.getUserPutInitialEmail())
+        mockMvc.perform(put("/user/" + userTestDataProperties.getUserPutInitialEmail())
                 .header(SecurityConstants.AUTH_HEADER_STRING, jwt)
                 .content(mapper.writeValueAsString(putUser))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        document = dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutInitialEmail()).get().get();
+        document = dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPutInitialEmail()).get().get();
         assertFalse(document.exists());
 
-        document = dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutChangedEmail()).get().get();
+        document = dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPutChangedEmail()).get().get();
         dbUser = new UserModel(Objects.requireNonNull(document.getData()));
 
-        assertEquals(testDataProperties.getUserPutChangedEmail(), dbUser.getEmail());
+        assertEquals(userTestDataProperties.getUserPutChangedEmail(), dbUser.getEmail());
         assertEquals(testUser.getUsername(), dbUser.getUsername());
-        assertTrue(bCryptPasswordEncoder.matches(testDataProperties.getUserPutChangedPassword(), dbUser.getPassword()));
+        assertTrue(bCryptPasswordEncoder.matches(userTestDataProperties.getUserPutChangedPassword(), dbUser.getPassword()));
         assertEquals(testUser.getType(), dbUser.getType());
         assertEquals(testUser.getProfilePicture(), dbUser.getProfilePicture());
-        assertEquals(testDataProperties.getUserPutChangedAccountStatus(), dbUser.getAccountStatus());
+        assertEquals(userTestDataProperties.getUserPutChangedAccountStatus(), dbUser.getAccountStatus());
     }
 
     @Test
     void sortUsersByPointsAndTrophies() throws Exception {
-        assertEquals(testDataProperties.getUserSortPoints().size(), testDataProperties.getUserSortTrophies().size());
-        int length = testDataProperties.getUserSortPoints().size();
+        assertEquals(userTestDataProperties.getUserSortPoints().size(), userTestDataProperties.getUserSortTrophies().size());
+        int length = userTestDataProperties.getUserSortPoints().size();
 
         // Create Users
         List<UserModel> users = new ArrayList<>();
@@ -257,9 +274,9 @@ public class UserControllerTest {
             UserModel toAdd = new UserModel(testUser);
             toAdd.setType(UserType.REGULAR_USER);
             toAdd.setEmail(toAdd.getEmail() + i);
-            toAdd.setTotalPoints(testDataProperties.getUserSortPoints().get(i));
-            toAdd.setTrophies(testDataProperties.getUserSortTrophies().get(i));
-            toAdd.setRafflesWon(testDataProperties.getUserRafflesWon());
+            toAdd.setTotalPoints(userTestDataProperties.getUserSortPoints().get(i));
+            toAdd.setTrophies(userTestDataProperties.getUserSortTrophies().get(i));
+            toAdd.setRafflesWon(userTestDataProperties.getUserRafflesWon());
 
             users.add(toAdd);
             usersToDelete.add(toAdd);
@@ -291,11 +308,46 @@ public class UserControllerTest {
     @AfterAll
     void cleanup() throws ExecutionException, InterruptedException {
         dbFirestore.collection(COLLECTION_NAME).document(testUser.getEmail()).delete().get();
-        dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPostEmail()).delete().get();
-        dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutInitialEmail()).delete().get();
-        dbFirestore.collection(COLLECTION_NAME).document(testDataProperties.getUserPutChangedEmail()).delete().get();
+        dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPostEmail()).delete().get();
+        dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPutInitialEmail()).delete().get();
+        dbFirestore.collection(COLLECTION_NAME).document(userTestDataProperties.getUserPutChangedEmail()).delete().get();
 
         for (UserModel user : usersToDelete)
             dbFirestore.collection(COLLECTION_NAME).document(user.getEmail()).delete().get();
+    }
+
+    private UserModel getUserFromJSON(String json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonNode parentNode = mapper.readTree(json);
+
+        String email = parentNode.path("email").asText(null);
+
+        String password = parentNode.path("password").asText(null);
+
+        String username = parentNode.path("username").asText(null);
+
+        UserType userType = UserType.valueOf(parentNode.path("type").asText(null));
+
+        String profilePicture = parentNode.path("profilePicture").asText(null);
+
+        String accountStatus = parentNode.path("accountStatus").asText(null);
+
+        if (userType == UserType.REGULAR_USER) {
+            Long totalPoints = parentNode.path("totalPoints").asLong(0L);
+
+            Long currentPoints = parentNode.path("currentPoints").asLong(0L);
+
+            Long trophies = parentNode.path("trophies").asLong(0L);
+
+            Boolean vipStatus = parentNode.path("vipStatus").asBoolean(false);
+
+            Long rafflesWon = parentNode.path("rafflesWon").asLong(0L);
+
+            return new UserModel(email, password, username, userType, profilePicture, accountStatus,
+                    totalPoints, currentPoints, trophies, vipStatus, rafflesWon);
+        } else {
+            return new UserModel(email, password, username, userType, profilePicture, accountStatus);
+        }
     }
 }

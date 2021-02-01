@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class UserModel implements Comparable<UserModel>{
+public class UserModel implements Comparable<UserModel> {
 
     protected String email;
     protected String password;
@@ -12,10 +12,10 @@ public class UserModel implements Comparable<UserModel>{
     protected UserType type;
     protected String profilePicture;
     protected String accountStatus;
-    private int totalPoints;
-    private int currentPoints;
-    private int trophies;
-    private boolean vipStatus;
+    private Long totalPoints;
+    private Long currentPoints;
+    private Long trophies;
+    private Boolean vipStatus;
     private Long rafflesWon;
 
     public UserModel() {
@@ -31,7 +31,7 @@ public class UserModel implements Comparable<UserModel>{
     }
 
     public UserModel(String email, String password, String username, UserType type, String profilePicture,
-                     String accountStatus, int totalPoints, int currentPoints, int trophies, boolean vipStatus, Long rafflesWon) {
+                     String accountStatus, Long totalPoints, Long currentPoints, Long trophies, Boolean vipStatus, Long rafflesWon) {
         this.email = email;
         this.password = password;
         this.username = username;
@@ -57,7 +57,7 @@ public class UserModel implements Comparable<UserModel>{
         if (type == UserType.REGULAR_USER) {
             this.totalPoints = userModel.getTotalPoints();
             this.currentPoints = userModel.getCurrentPoints();
-            this.trophies=userModel.trophies;
+            this.trophies = userModel.trophies;
             this.vipStatus = userModel.isVipStatus();
             this.rafflesWon = userModel.getRafflesWon();
         }
@@ -71,9 +71,9 @@ public class UserModel implements Comparable<UserModel>{
         this.profilePicture = (String) map.getOrDefault("profilePicture", "no profile picture");
         this.accountStatus = (String) map.getOrDefault("accountStatus", "no account_status");
         if (type == UserType.REGULAR_USER) {
-            this.totalPoints = ((Long) map.getOrDefault("totalPoints", 0)).intValue();
-            this.currentPoints = ((Long) map.getOrDefault("currentPoints", 0)).intValue();
-            this.trophies = ((Long) map.getOrDefault("trophies", 0)).intValue();
+            this.totalPoints = ((Long) map.getOrDefault("totalPoints", 0L));
+            this.currentPoints = ((Long) map.getOrDefault("currentPoints", 0L));
+            this.trophies = ((Long) map.getOrDefault("trophies", 0L));
             this.vipStatus = (Boolean) map.getOrDefault("vipStatus", false);
             this.rafflesWon = (Long) map.getOrDefault("rafflesWon", 0L);
         }
@@ -127,37 +127,45 @@ public class UserModel implements Comparable<UserModel>{
         this.accountStatus = accountStatus;
     }
 
-    public int getTotalPoints() {
+    public Long getTotalPoints() {
         return totalPoints;
     }
 
-    public void setTotalPoints(int totalPoints) {
+    public void setTotalPoints(Long totalPoints) {
         this.totalPoints = totalPoints;
     }
 
-    public int getCurrentPoints() {
+    public Long getCurrentPoints() {
         return currentPoints;
     }
 
-    public void setCurrentPoints(int currentPoints) {
+    public void setCurrentPoints(Long currentPoints) {
         this.currentPoints = currentPoints;
     }
 
-    public int getTrophies() { return trophies; }
+    public Long getTrophies() {
+        return trophies;
+    }
 
-    public void setTrophies(int trophies) { this.trophies = trophies; }
+    public void setTrophies(Long trophies) {
+        this.trophies = trophies;
+    }
 
-    public boolean isVipStatus() {
+    public Boolean isVipStatus() {
         return vipStatus;
     }
 
-    public void setVipStatus(boolean vipStatus) {
+    public void setVipStatus(Boolean vipStatus) {
         this.vipStatus = vipStatus;
     }
 
-    public Long getRafflesWon() { return rafflesWon; }
+    public Long getRafflesWon() {
+        return rafflesWon;
+    }
 
-    public void setRafflesWon(Long rafflesWon) { this.rafflesWon = rafflesWon; }
+    public void setRafflesWon(Long rafflesWon) {
+        this.rafflesWon = rafflesWon;
+    }
 
     @Override
     public String toString() {
@@ -194,9 +202,9 @@ public class UserModel implements Comparable<UserModel>{
                 Objects.equals(accountStatus, userModel.accountStatus);
 
         if (type == UserType.REGULAR_USER) {
-            eq = eq && totalPoints == userModel.totalPoints &&
-                    currentPoints == userModel.currentPoints &&
-                    trophies == userModel.trophies &&
+            eq = eq && totalPoints.equals(userModel.totalPoints) &&
+                    currentPoints.equals(userModel.currentPoints) &&
+                    trophies.equals(userModel.trophies) &&
                     vipStatus == userModel.vipStatus &&
                     rafflesWon.equals(userModel.rafflesWon);
         }
@@ -247,11 +255,16 @@ public class UserModel implements Comparable<UserModel>{
             map.put("accountStatus", accountStatus);
 
         if (type == UserType.REGULAR_USER) {
-            map.put("totalPoints", totalPoints);
-            map.put("currentPoints", currentPoints);
-            map.put("trophies", trophies);
-            map.put("vipStatus", vipStatus);
-            map.put("rafflesWon", rafflesWon);
+            if (totalPoints != null || includeEmptyFields)
+                map.put("totalPoints", totalPoints);
+            if (currentPoints != null || includeEmptyFields)
+                map.put("currentPoints", currentPoints);
+            if (trophies != null || includeEmptyFields)
+                map.put("trophies", trophies);
+            if (vipStatus != null || includeEmptyFields)
+                map.put("vipStatus", vipStatus);
+            if (rafflesWon != null || includeEmptyFields)
+                map.put("rafflesWon", rafflesWon);
         }
 
         return map;
@@ -259,9 +272,9 @@ public class UserModel implements Comparable<UserModel>{
 
     @Override
     public int compareTo(UserModel userToCompare) {
-        int thisUserScore = totalPoints + trophies * 10;
-        int userToCompareScore = userToCompare.getTotalPoints() + userToCompare.getTrophies() * 10;
+        long thisUserScore = totalPoints + trophies * 10;
+        long userToCompareScore = userToCompare.getTotalPoints() + userToCompare.getTrophies() * 10;
 
-        return thisUserScore - userToCompareScore;
+        return ((Long) (thisUserScore - userToCompareScore)).intValue();
     }
 }
